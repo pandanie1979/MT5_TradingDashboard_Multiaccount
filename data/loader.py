@@ -75,11 +75,11 @@ def get_ea_data(account_id: str, mt5_path: str):
             except Exception as e:
                 # Log errore ma continua con altri file
                 if st.sidebar.checkbox("Mostra errori EA dettagliati", value=False, key=f"show_ea_errors_{account_id}"):
-                    st.warning(f"⚠️ Errore nel file EA {os.path.basename(file_path)}: {str(e)}")
+                    st.warning(f"âš ï¸ Errore nel file EA {os.path.basename(file_path)}: {str(e)}")
                 continue
                 
     except Exception as e:
-        st.error(f"❌ Errore nell'accesso alla cartella MT5 per Account {account_id}: {str(e)}")
+        st.error(f"âŒ Errore nell'accesso alla cartella MT5 per Account {account_id}: {str(e)}")
         return pd.DataFrame()
 
     return pd.DataFrame(ea_list)
@@ -164,7 +164,7 @@ def get_trades_data(account_id: str, mt5_path: str):
             except Exception as e:
                 # Log solo se verbose mode
                 if st.sidebar.checkbox("Mostra errori Trade dettagliati", value=False, key=f"show_trade_errors_{account_id}"):
-                    st.warning(f"⚠️ Errore nel file trade {os.path.basename(file_path)}: {str(e)}")
+                    st.warning(f"âš ï¸ Errore nel file trade {os.path.basename(file_path)}: {str(e)}")
                 continue
         
         # Pulisci progress bar
@@ -173,7 +173,7 @@ def get_trades_data(account_id: str, mt5_path: str):
             progress_text.empty()
     
     except Exception as e:
-        st.error(f"❌ Errore nell'accesso alla cartella MT5 per Account {account_id}: {str(e)}")
+        st.error(f"âŒ Errore nell'accesso alla cartella MT5 per Account {account_id}: {str(e)}")
         return pd.DataFrame()
 
     if all_trades:
@@ -197,7 +197,7 @@ def get_trades_data(account_id: str, mt5_path: str):
         '''
         with st.sidebar:
             st.success(f"""
-            📊 **Account {account_id}:**
+            ðŸ“Š **Account {account_id}:**
             - Files processati: {files_processed}
             - Files con trades: {files_with_trades}
             - Trades unici: {unique_trades:,}

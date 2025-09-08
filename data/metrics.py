@@ -241,7 +241,7 @@ def calculate_dynamic_color(live_ratio):
 def create_continuous_equity_curve(trades_df, plot_date_col='PlotDate', multi_mn=False):
     """
     Crea equity curve continua SENZA interruzioni per colori.
-    PRIORITÀ: Mantenere continuità matematica perfetta.
+    PRIORITÃ€: Mantenere continuitÃ  matematica perfetta.
     
     Args:
         trades_df: DataFrame con i trade
@@ -262,7 +262,7 @@ def create_continuous_equity_curve(trades_df, plot_date_col='PlotDate', multi_mn
     equity_data['Running_Peak'] = equity_data['Cumulative_PL'].cummax()
     equity_data['Drawdown'] = equity_data['Cumulative_PL'] - equity_data['Running_Peak']
     
-    # Aggiungi info per colori SENZA interrompere la continuità
+    # Aggiungi info per colori SENZA interrompere la continuitÃ 
     if multi_mn and 'trade_type' in equity_data.columns:
         # Analisi settimanale per multi-MN
         equity_data = calculate_weekly_trade_composition(equity_data, plot_date_col)
@@ -276,7 +276,7 @@ def create_continuous_equity_curve(trades_df, plot_date_col='PlotDate', multi_mn
             lambda x: '#cccccc' if x == 'backtest' else '#1f77b4'
         )
     else:
-        # Default per compatibilità
+        # Default per compatibilitÃ 
         equity_data['live_ratio'] = 1.0
         equity_data['week_type'] = 'live'
         equity_data['dynamic_color'] = '#1f77b4'
@@ -303,7 +303,7 @@ def generate_color_segments_for_plotly(equity_data, plot_date_col='PlotDate'):
     
     for i, row in equity_data.iterrows():
         if current_color != row['dynamic_color']:
-            # Se non è il primo segmento, chiudi il precedente
+            # Se non Ã¨ il primo segmento, chiudi il precedente
             if current_color is not None and segment_start_date is not None:
                 shapes.append({
                     'type': 'rect',
@@ -352,7 +352,7 @@ def format_hover_info_detailed(row, multi_mn=False):
     """
     base_info = f"""
     <b>Data:</b> {row.get('PlotDate', 'N/A')}<br>
-    <b>Equity:</b> €{row.get('Cumulative_PL', 0):.2f}
+    <b>Equity:</b> â‚¬{row.get('Cumulative_PL', 0):.2f}
     """
     
     if 'live_ratio' in row and pd.notna(row['live_ratio']):
@@ -361,16 +361,16 @@ def format_hover_info_detailed(row, multi_mn=False):
         
         if multi_mn:
             if live_pct == 100:
-                period_info = "<br><b>Settimana:</b> 📈 100% Live Trading"
+                period_info = "<br><b>Settimana:</b> ðŸ“ˆ 100% Live Trading"
             elif live_pct == 0:
-                period_info = "<br><b>Settimana:</b> 🧪 100% Backtest"
+                period_info = "<br><b>Settimana:</b> ðŸ§ª 100% Backtest"
             else:
-                period_info = f"<br><b>Settimana:</b> 🔄 {live_pct:.0f}% Live, {backtest_pct:.0f}% Backtest"
+                period_info = f"<br><b>Settimana:</b> ðŸ”„ {live_pct:.0f}% Live, {backtest_pct:.0f}% Backtest"
         else:
             if live_pct == 100:
-                period_info = "<br><b>Tipo:</b> 📈 Live Trading"
+                period_info = "<br><b>Tipo:</b> ðŸ“ˆ Live Trading"
             else:
-                period_info = "<br><b>Tipo:</b> 🧪 Backtest"
+                period_info = "<br><b>Tipo:</b> ðŸ§ª Backtest"
         
         return base_info + period_info
     
@@ -398,7 +398,7 @@ def format_status(status):
         'PAUSED': 'orange'
     }
     color = colors.get(status, 'gray')
-    return f"<span style='color: {color}; font-weight: bold;'>●</span> {status}"
+    return f"<span style='color: {color}; font-weight: bold;'>â—</span> {status}"
 
 def format_yes_no(value):
     """Formatta i valori Yes/No con colori"""
@@ -411,11 +411,11 @@ def format_account_badge(account_id: str, color: str = '#1f77b4') -> str:
     <div style="display: inline-block; padding: 4px 8px; background: {color}22; 
                 color: {color}; border: 1px solid {color}44; border-radius: 12px; 
                 font-size: 12px; font-weight: bold; margin: 2px;">
-        🏦 {account_id}
+        ðŸ¦ {account_id}
     </div>
     """
 
-def format_currency(value: float, currency: str = "€") -> str:
+def format_currency(value: float, currency: str = "â‚¬") -> str:
     """Formatta valori monetari con segno e colore"""
     if value >= 0:
         color = "green"

@@ -141,7 +141,7 @@ def format_time_ago(timestamp: Union[str, datetime, pd.Timestamp]) -> str:
     if isinstance(timestamp, str):
         timestamp = pd.to_datetime(timestamp)
     elif isinstance(timestamp, pd.Timestamp):
-        timestamp = timestamp.to_pydatetime()
+        timestamp = timestamp.to_pydatetime().values
     
     diff = now - timestamp
     

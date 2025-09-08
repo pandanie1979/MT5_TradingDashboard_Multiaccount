@@ -24,17 +24,17 @@ def render_margin_debug_section(debug_results: Dict, account_id: str, account_co
     st.markdown(f"""
     <div style="display: flex; align-items: center; margin-bottom: 15px;">
         <div style="width: 3px; height: 25px; background: {account_color}; margin-right: 10px; border-radius: 1px;"></div>
-        <h3 style="margin: 0;">🔍 DEBUG: Analisi Dati Margine Account {account_id}</h3>
+        <h3 style="margin: 0;">ðŸ” DEBUG: Analisi Dati Margine Account {account_id}</h3>
     </div>
     """, unsafe_allow_html=True)
     
     if "error" in debug_results:
-        st.error(f"❌ {debug_results['error']}")
+        st.error(f"âŒ {debug_results['error']}")
         return
     
     # Tab per organizzare le varie sezioni di debug
     debug_tab1, debug_tab2, debug_tab3, debug_tab4 = st.tabs([
-        "📊 Panoramica", "⚠️ Anomalie", "📋 Eventi Dettaglio", "🔬 Dati Raw"
+        "ðŸ“Š Panoramica", "âš ï¸ Anomalie", "ðŸ“‹ Eventi Dettaglio", "ðŸ”¬ Dati Raw"
     ])
     
     with debug_tab1:
@@ -53,7 +53,7 @@ def render_debug_overview(debug_results: Dict, account_id: str, account_color: s
     """
     Renderizza la panoramica generale del debug.
     """
-    st.subheader(f"📊 Panoramica Debug Account {account_id}")
+    st.subheader(f"ðŸ“Š Panoramica Debug Account {account_id}")
     
     stats = debug_results.get('statistics', {})
     timeline = debug_results.get('debug_timeline', pd.DataFrame())
@@ -76,12 +76,12 @@ def render_debug_overview(debug_results: Dict, account_id: str, account_color: s
         final_margin = timeline_stats.get('final_margin', 0)
         final_positions = timeline_stats.get('final_positions', 0)
         
-        # Indica se c'è il problema del piedistallo
+        # Indica se c'Ã¨ il problema del piedistallo
         if final_margin > 0 and final_positions == 0:
-            st.metric("🚨 Piedistallo", f"€{final_margin:.2f}", 
+            st.metric("ðŸš¨ Piedistallo", f"â‚¬{final_margin:.2f}", 
                      help="Margine finale > 0 senza posizioni aperte!")
         else:
-            st.metric("✅ Margine Finale", f"€{final_margin:.2f}")
+            st.metric("✅ Margine Finale", f"â‚¬{final_margin:.2f}")
     
     # Grafico timeline debug
     if not timeline.empty:
@@ -95,7 +95,7 @@ def render_debug_timeline_chart(timeline_df: pd.DataFrame, account_id: str, acco
     """
     Renderizza il grafico della timeline di debug del margine.
     """
-    st.markdown("### 📈 Timeline Debug Margine")
+    st.markdown("### ðŸ“ˆ Timeline Debug Margine")
     
     fig = make_subplots(
         rows=2, cols=1,
@@ -118,7 +118,7 @@ def render_debug_timeline_chart(timeline_df: pd.DataFrame, account_id: str, acco
             line=dict(color=account_color, width=2),
             marker=dict(size=4),
             hovertemplate=('<b>Data:</b> %{x}<br>' +
-                          '<b>Margine:</b> €%{y:.2f}<br>' +
+                          '<b>Margine:</b> â‚¬%{y:.2f}<br>' +
                           '<b>Evento:</b> %{customdata[0]}<br>' +
                           '<b>Ticket:</b> %{customdata[1]}<extra></extra>'),
             customdata=timeline_df[['event_type', 'ticket']].values
@@ -151,26 +151,26 @@ def render_debug_timeline_chart(timeline_df: pd.DataFrame, account_id: str, acco
         plot_bgcolor='white'
     )
     
-    fig.update_yaxes(title_text="Margine (€)", row=1, col=1, gridcolor='lightgray')
-    fig.update_yaxes(title_text="N° Posizioni", row=2, col=1, gridcolor='lightgray')
+    fig.update_yaxes(title_text="Margine (â‚¬)", row=1, col=1, gridcolor='lightgray')
+    fig.update_yaxes(title_text="NÂ° Posizioni", row=2, col=1, gridcolor='lightgray')
     fig.update_xaxes(title_text="Data", row=2, col=1, gridcolor='lightgray')
     
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
     
     # Highlight del problema finale
     final_row = timeline_df.iloc[-1]
     if final_row['total_margin_calculated'] > 0 and final_row['open_positions_count'] == 0:
-        st.error(f"🚨 **PROBLEMA IDENTIFICATO**: Margine finale €{final_row['total_margin_calculated']:.2f} " +
+        st.error(f"ðŸš¨ **PROBLEMA IDENTIFICATO**: Margine finale â‚¬{final_row['total_margin_calculated']:.2f} " +
                 f"con 0 posizioni aperte alla data {final_row['timestamp']}")
     else:
-        st.success(f"✅ Stato finale coerente: €{final_row['total_margin_calculated']:.2f} margine " +
+        st.success(f"✅ Stato finale coerente: â‚¬{final_row['total_margin_calculated']:.2f} margine " +
                   f"con {final_row['open_positions_count']} posizioni aperte")
 
 def render_anomalies_analysis(debug_results: Dict, account_id: str):
     """
     Renderizza l'analisi delle anomalie trovate.
     """
-    st.subheader(f"⚠️ Anomalie Identificate - Account {account_id}")
+    st.subheader(f"âš ï¸ Anomalie Identificate - Account {account_id}")
     
     anomalies = debug_results.get('anomalies', [])
     
@@ -178,15 +178,15 @@ def render_anomalies_analysis(debug_results: Dict, account_id: str):
         st.success("✅ Nessuna anomalia rilevata nei dati di margine!")
         return
     
-    # Organizza anomalie per severità
+    # Organizza anomalie per severitÃ 
     high_severity = [a for a in anomalies if a.get('severity') == 'HIGH']
     medium_severity = [a for a in anomalies if a.get('severity') == 'MEDIUM']
     
     if high_severity:
-        st.error(f"🚨 **{len(high_severity)} Anomalie ad Alta Severità:**")
+        st.error(f"ðŸš¨ **{len(high_severity)} Anomalie ad Alta SeveritÃ :**")
         for i, anomaly in enumerate(high_severity):
             # Usa container invece di expander per evitare nesting
-            st.markdown(f"### 🔴 {anomaly['type']}")
+            st.markdown(f"### ðŸ”´ {anomaly['type']}")
             with st.container():
                 st.write(f"**Descrizione:** {anomaly['description']}")
                 if 'timestamp' in anomaly:
@@ -196,10 +196,10 @@ def render_anomalies_analysis(debug_results: Dict, account_id: str):
             st.markdown("---")  # Separatore tra anomalie
     
     if medium_severity:
-        st.warning(f"⚠️ **{len(medium_severity)} Anomalie a Media Severità:**")
+        st.warning(f"âš ï¸ **{len(medium_severity)} Anomalie a Media SeveritÃ :**")
         for i, anomaly in enumerate(medium_severity):
             # Usa selectbox/checkbox per rendere collassabile senza expander
-            show_details = st.checkbox(f"🟡 Mostra dettagli: {anomaly['type']}", 
+            show_details = st.checkbox(f"ðŸŸ¡ Mostra dettagli: {anomaly['type']}", 
                                      key=f"anomaly_details_{account_id}_{i}")
             if show_details:
                 with st.container():
@@ -212,7 +212,7 @@ def render_events_detail(debug_results: Dict, account_id: str):
     """
     Renderizza i dettagli degli eventi di margine.
     """
-    st.subheader(f"📋 Eventi Margine Dettagliati - Account {account_id}")
+    st.subheader(f"ðŸ“‹ Eventi Margine Dettagliati - Account {account_id}")
     
     timeline = debug_results.get('debug_timeline', pd.DataFrame())
     
@@ -247,14 +247,14 @@ def render_events_detail(debug_results: Dict, account_id: str):
         
         st.dataframe(
             filtered_timeline[display_columns],
-            use_container_width=True,
+            width='stretch',
             column_config={
                 "timestamp": st.column_config.DatetimeColumn("Data/Ora"),
                 "event_type": st.column_config.TextColumn("Tipo Evento"),
                 "ticket": st.column_config.NumberColumn("Ticket"),
-                "event_margin": st.column_config.NumberColumn("Margine Evento", format="%.2f €"),
-                "total_margin_calculated": st.column_config.NumberColumn("Margine Totale", format="%.2f €"),
-                "open_positions_count": st.column_config.NumberColumn("N° Posizioni")
+                "event_margin": st.column_config.NumberColumn("Margine Evento", format="%.2f â‚¬"),
+                "total_margin_calculated": st.column_config.NumberColumn("Margine Totale", format="%.2f â‚¬"),
+                "open_positions_count": st.column_config.NumberColumn("NÂ° Posizioni")
             }
         )
     else:
@@ -263,7 +263,7 @@ def render_events_detail(debug_results: Dict, account_id: str):
     # Dettaglio evento selezionato
     if not filtered_timeline.empty:
         st.markdown("---")
-        st.subheader("🔍 Dettaglio Evento Selezionato")
+        st.subheader("ðŸ” Dettaglio Evento Selezionato")
         
         selected_idx = st.selectbox(
             "Seleziona evento per dettagli:",
@@ -282,8 +282,8 @@ def render_events_detail(debug_results: Dict, account_id: str):
                     "Timestamp": str(selected_event['timestamp']),
                     "Event Type": selected_event['event_type'],
                     "Ticket": int(selected_event['ticket']),
-                    "Event Margin": f"€{selected_event['event_margin']:.2f}",
-                    "Total Margin": f"€{selected_event['total_margin_calculated']:.2f}",
+                    "Event Margin": f"â‚¬{selected_event['event_margin']:.2f}",
+                    "Total Margin": f"â‚¬{selected_event['total_margin_calculated']:.2f}",
                     "Open Positions": int(selected_event['open_positions_count'])
                 })
             
@@ -292,7 +292,7 @@ def render_events_detail(debug_results: Dict, account_id: str):
                 position_details = selected_event.get('position_details', {})
                 if position_details:
                     for ticket, details in position_details.items():
-                        st.write(f"- **Ticket {ticket}**: €{details['margin']:.2f} ({details['symbol']})")
+                        st.write(f"- **Ticket {ticket}**: â‚¬{details['margin']:.2f} ({details['symbol']})")
                 else:
                     st.write("Nessuna posizione aperta")
 
@@ -300,7 +300,7 @@ def render_statistics_summary(stats: Dict):
     """
     Renderizza il riepilogo delle statistiche di debug.
     """
-    st.markdown("### 📈 Statistiche Debug")
+    st.markdown("### ðŸ“ˆ Statistiche Debug")
     
     col1, col2 = st.columns(2)
     
@@ -324,18 +324,18 @@ def render_statistics_summary(stats: Dict):
         if margin_open:
             st.write("**MarginAtOpen:**")
             st.json({
-                "Min": f"€{margin_open.get('min', 0):.2f}",
-                "Max": f"€{margin_open.get('max', 0):.2f}",
-                "Media": f"€{margin_open.get('avg', 0):.2f}",
+                "Min": f"â‚¬{margin_open.get('min', 0):.2f}",
+                "Max": f"â‚¬{margin_open.get('max', 0):.2f}",
+                "Media": f"â‚¬{margin_open.get('avg', 0):.2f}",
                 "Count": margin_open.get('count', 0)
             })
         
         if margin_close:
             st.write("**MarginAtClose:**")
             st.json({
-                "Min": f"€{margin_close.get('min', 0):.2f}",
-                "Max": f"€{margin_close.get('max', 0):.2f}",
-                "Media": f"€{margin_close.get('avg', 0):.2f}",
+                "Min": f"â‚¬{margin_close.get('min', 0):.2f}",
+                "Max": f"â‚¬{margin_close.get('max', 0):.2f}",
+                "Media": f"â‚¬{margin_close.get('avg', 0):.2f}",
                 "Chiusure complete (=0)": margin_close.get('zero_count', 0),
                 "Chiusure parziali (>0)": margin_close.get('non_zero_count', 0)
             })
@@ -344,7 +344,7 @@ def render_raw_data_analysis(debug_results: Dict, account_id: str):
     """
     Renderizza l'analisi dei dati raw.
     """
-    st.subheader(f"🔬 Analisi Dati Raw - Account {account_id}")
+    st.subheader(f"ðŸ”¬ Analisi Dati Raw - Account {account_id}")
     
     raw_info = debug_results.get('raw_data_info', {})
     
@@ -395,7 +395,7 @@ def render_raw_data_analysis(debug_results: Dict, account_id: str):
         missing_critical.append("CloseDatetime")
     
     if missing_critical:
-        st.error(f"❌ **Colonne critiche mancanti**: {', '.join(missing_critical)}")
+        st.error(f"âŒ **Colonne critiche mancanti**: {', '.join(missing_critical)}")
         st.write("Questo potrebbe spiegare problemi nel calcolo del margine timeline.")
     else:
         st.success("✅ Tutte le colonne critiche per il margine sono presenti")
@@ -410,12 +410,12 @@ def render_comparison_with_current_timeline(debug_results: Dict, current_timelin
         account_id: ID account
     """
     st.markdown("---")
-    st.subheader(f"🔄 Confronto Timeline Debug vs Corrente - Account {account_id}")
+    st.subheader(f"ðŸ”„ Confronto Timeline Debug vs Corrente - Account {account_id}")
     
     debug_timeline = debug_results.get('debug_timeline', pd.DataFrame())
     
     if debug_timeline.empty or current_timeline.empty:
-        st.warning("Impossibile fare confronto: una delle timeline è vuota")
+        st.warning("Impossibile fare confronto: una delle timeline Ã¨ vuota")
         return
     
     # Confronta valori finali
@@ -425,19 +425,19 @@ def render_comparison_with_current_timeline(debug_results: Dict, current_timelin
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.metric("Margine Finale (Debug)", f"€{debug_final:.2f}")
+        st.metric("Margine Finale (Debug)", f"â‚¬{debug_final:.2f}")
     
     with col2:
-        st.metric("Margine Finale (Corrente)", f"€{current_final:.2f}")
+        st.metric("Margine Finale (Corrente)", f"â‚¬{current_final:.2f}")
     
     with col3:
         difference = abs(debug_final - current_final)
         match = difference < 0.01
         
         if match:
-            st.metric("✅ Differenza", f"€{difference:.2f}", delta="Match!")
+            st.metric("✅ Differenza", f"â‚¬{difference:.2f}", delta="Match!")
         else:
-            st.metric("⚠️ Differenza", f"€{difference:.2f}", delta="Non coincidono")
+            st.metric("âš ï¸ Differenza", f"â‚¬{difference:.2f}", delta="Non coincidono")
     
     # Grafico comparativo
     if not match:
@@ -452,7 +452,7 @@ def render_comparison_with_current_timeline(debug_results: Dict, current_timelin
             mode='lines',
             name='Debug Timeline',
             line=dict(color='red', width=2),
-            hovertemplate='<b>Debug:</b> €%{y:.2f}<br><b>Data:</b> %{x}<extra></extra>'
+            hovertemplate='<b>Debug:</b> â‚¬%{y:.2f}<br><b>Data:</b> %{x}<extra></extra>'
         ))
         
         # Timeline corrente
@@ -462,19 +462,19 @@ def render_comparison_with_current_timeline(debug_results: Dict, current_timelin
             mode='lines',
             name='Timeline Corrente',
             line=dict(color='blue', width=2, dash='dash'),
-            hovertemplate='<b>Corrente:</b> €%{y:.2f}<br><b>Data:</b> %{x}<extra></extra>'
+            hovertemplate='<b>Corrente:</b> â‚¬%{y:.2f}<br><b>Data:</b> %{x}<extra></extra>'
         ))
         
         fig.update_layout(
             title=f"Confronto Timeline Margine - Account {account_id}",
             xaxis_title="Data",
-            yaxis_title="Margine (€)",
+            yaxis_title="Margine (â‚¬)",
             hovermode='x unified',
             height=400
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
         
-        st.warning("⚠️ **Le timeline non coincidono!** Questo indica un problema nella logica di calcolo del margine.")
+        st.warning("âš ï¸ **Le timeline non coincidono!** Questo indica un problema nella logica di calcolo del margine.")
     else:
         st.success("✅ Le timeline coincidono perfettamente. Il problema potrebbe essere nei dati EA o nella logica di ricostruzione.")

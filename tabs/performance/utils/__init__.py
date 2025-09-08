@@ -1,4 +1,4 @@
-﻿# MT5 Trading Dashboard - Performance Tab Refactored
+# MT5 Trading Dashboard - Performance Tab Refactored
 # File: tabs/performance/utils/__init__.py
 # Generated: 20250905_124110
 # Refactoring: v1.4 -> v1.5

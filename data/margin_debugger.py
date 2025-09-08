@@ -205,7 +205,7 @@ class MarginDebugger:
             if (event['event_type'] == 'CLOSE' and 
                 event['margin_at_close'] is not None and 
                 event['margin_at_close'] > 0):
-                # Verifica se questa è davvero una chiusura completa
+                # Verifica se questa Ã¨ davvero una chiusura completa
                 margin_close_anomalies.append({
                     'ticket': event['ticket'],
                     'margin_at_close': event['margin_at_close'],
@@ -288,7 +288,7 @@ class MarginDebugger:
             # Test 2: Nessuna riga con MarginAtClose = 0
             no_zero_margin = not any(margin_at_close_values == 0) if not margin_at_close_values.empty else True
             
-            # Se c'è un problema, raccoglie dettagli
+            # Se c'Ã¨ un problema, raccoglie dettagli
             if size_mismatch or no_zero_margin:
                 
                 # Trova tutte le date di chiusura per questa posizione

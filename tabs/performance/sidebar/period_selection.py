@@ -1,169 +1,157 @@
-﻿# MT5 Trading Dashboard - Period Selection Component (SIMPLIFIED)
+﻿# MT5 Trading Dashboard - Period Selection Component (PENDING STATE)
 # File: tabs/performance/sidebar/period_selection.py
-# Modified: September 2025 - Removed preset buttons, manual date selection only
+# Modified: September 2025 - Updated to use pending state keys
 
 """
 Period selection controls for sidebar.
-SIMPLIFIED: Only manual date range selection, no preset buttons.
+UPDATED: Uses pending state keys - changes are applied only when user clicks Update Metrics.
 """
 
 import streamlit as st
 import pandas as pd
-from datetime import date, datetime
-from typing import Dict, Any, Tuple
-
-from ..utils.session_helpers import (
-    get_period_configuration,
-    calculate_preset_dates,
-    validate_date_range
-)
-from ..config.constants import get_session_key
-from ..utils.formatting import get_error_message, get_success_message
+from datetime import date, datetime, timedelta
+from typing import Dict, Any
 
 
-def render_period_selection_enhanced(trades_df: pd.DataFrame, account_id: str):
+def render_period_selection_enhanced(trades_data, account_id):
     """
-    Render SIMPLIFIED period selection - ONLY manual date inputs.
-    Removed preset buttons as requested.
+    Period selection interface using PENDING state.
+    Changes are saved to pending_* keys and applied only via Update Metrics button.
     
     Args:
-        trades_df: Complete trades DataFrame
-        account_id: Account identifier
+        trades_data: DataFrame dei trade
+        account_id: ID dell'account
+    
+    Returns:
+        Dict con configurazione periodo pending
     """
-    if trades_df.empty:
-        st.warning("Nessun dato disponibile per selezione periodo")
-        return
+    real_account_id = str(account_id)
     
-    # Get date range from data
-    min_date = trades_df['OpenDatetime'].min().date()
-    max_date = trades_df['OpenDatetime'].max().date()
+    st.write("📅 **Selezione Periodo**")
     
-    # REMOVED: render_preset_buttons() - non più necessari
-    
-    st.markdown("**Selezione Periodo:**")
-    
-    # Render ONLY custom date inputs
-    render_custom_date_inputs(account_id, min_date, max_date)
-    
-    # Show period validation
-    render_period_validation(account_id)
-
-
-def render_custom_date_inputs(account_id: str, min_date: date, max_date: date):
-    """
-    Render ONLY custom date input controls - FIXED with user modification tracking.
-    Now properly tracks when user modifies dates to prevent resets.
-    """
-    # IMPORTANTE: Inizializza SEMPRE le chiavi prima di usarle nei widget
-    start_key = f"date_start_{account_id}"
-    end_key = f"date_end_{account_id}"
-    
-    # Inizializza se non esistono
-    if start_key not in st.session_state or end_key not in st.session_state:
-        default_start, default_end = calculate_preset_dates("30d", min_date, max_date)
-        st.session_state[start_key] = default_start
-        st.session_state[end_key] = default_end
-    
-    # Store original values to detect changes
-    original_start = st.session_state[start_key]
-    original_end = st.session_state[end_key]
-    
-    # Render widgets
-    start_date = st.date_input(
-        "Data Inizio",
-        min_value=min_date,
-        max_value=max_date,
-        key=start_key,
-        help="Seleziona data inizio periodo analisi"
-    )
-    
-    end_date = st.date_input(
-        "Data Fine", 
-        min_value=min_date,
-        max_value=max_date,
-        key=end_key,
-        help="Seleziona data fine periodo analisi"
-    )
-    
-    # NUOVO: Detect if user changed dates and mark as user-modified
-    if (start_date != original_start or end_date != original_end):
-        from ..utils.session_helpers import mark_period_as_user_modified
-        mark_period_as_user_modified(account_id)
-
-
-def render_period_validation(account_id: str):
-    """
-    Render period validation feedback.
-    
-    Args:
-        account_id: Account identifier
-    """
-    period_config = get_period_configuration(account_id)
-    
-    if not period_config:
-        st.info("Seleziona un periodo per l'analisi")
-        return
-    
-    start_date = period_config['start_date']
-    end_date = period_config['end_date']
-    
-    # Validate date range
-    is_valid, error_message = validate_date_range(start_date, end_date)
-    
-    if not is_valid:
-        st.error(f"❌ {error_message}")
+    # Calculate data range
+    if hasattr(trades_data, 'shape') and not trades_data.empty:
+        data_start = trades_data['OpenDatetime'].min().date()
+        data_end = trades_data['OpenDatetime'].max().date()
+        st.info(f"📊 Dati disponibili: {data_start} → {data_end}")
     else:
-        days_span = (end_date - start_date).days
-        st.success(f"✅ Periodo: {days_span} giorni")
+        data_start = datetime.now().date() - timedelta(days=365)
+        data_end = datetime.now().date()
+        st.warning("⚠️ Nessun dato disponibile")
+    
+    # PENDING state keys for widgets
+    pending_start_key = f"pending_start_{real_account_id}"
+    pending_end_key = f"pending_end_{real_account_id}"
+    
+    # Initialize pending state if not exists
+    if pending_start_key not in st.session_state:
+        today = datetime.now().date()
+        safe_end = min(today, data_end)
+        proposed_start = safe_end - timedelta(days=30)
+        safe_start = max(data_start, proposed_start)
         
-        # Show additional period info
-        render_period_summary(start_date, end_date, days_span)
-
-
-def render_period_summary(start_date: date, end_date: date, days_span: int):
-    """
-    Render period summary information.
+        if safe_start > safe_end:
+            safe_start = max(data_start, safe_end - timedelta(days=7))
+        
+        st.session_state[pending_start_key] = safe_start
+        st.session_state[pending_end_key] = safe_end
     
-    Args:
-        start_date: Start date
-        end_date: End date
-        days_span: Number of days in period
-    """
-    # Determine period type
-    if days_span <= 7:
-        period_type = "📅 Settimana"
-    elif days_span <= 31:
-        period_type = "📆 Mese"
-    elif days_span <= 93:
-        period_type = "🗓️ Trimestre"
-    elif days_span <= 366:
-        period_type = "📋 Anno"
+    # Date input widgets using PENDING keys
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        safe_start_value = st.session_state[pending_start_key]
+        if safe_start_value < data_start:
+            safe_start_value = data_start
+            st.session_state[pending_start_key] = safe_start_value
+        elif safe_start_value > data_end:
+            safe_start_value = data_end - timedelta(days=1)
+            st.session_state[pending_start_key] = safe_start_value
+            
+        start_date = st.date_input(
+            "Data Inizio:",
+            value=safe_start_value,
+            min_value=data_start,
+            max_value=data_end,
+            key=f"widget_start_pending_{real_account_id}",
+            help="Seleziona data inizio analisi (non applicata fino a Update)"
+        )
+        
+        # Update pending state
+        st.session_state[pending_start_key] = start_date
+    
+    with col2:
+        safe_end_value = st.session_state[pending_end_key]
+        if safe_end_value < data_start:
+            safe_end_value = data_start + timedelta(days=1)
+            st.session_state[pending_end_key] = safe_end_value
+        elif safe_end_value > data_end:
+            safe_end_value = data_end
+            st.session_state[pending_end_key] = safe_end_value
+            
+        end_date = st.date_input(
+            "Data Fine:",
+            value=safe_end_value,
+            min_value=data_start,
+            max_value=data_end,
+            key=f"widget_end_pending_{real_account_id}",
+            help="Seleziona data fine analisi (non applicata fino a Update)"
+        )
+        
+        # Update pending state
+        st.session_state[pending_end_key] = end_date
+    
+    # Show current pending period
+    current_start = st.session_state[pending_start_key]
+    current_end = st.session_state[pending_end_key]
+    
+    if current_start > current_end:
+        st.error("⚠️ Data inizio deve essere ≤ data fine")
     else:
-        period_type = "📊 Multi-Anno"
+        days_diff = (current_end - current_start).days
+        st.caption(f"🎯 **Periodo Selezionato** (pending): {current_start} → {current_end} ({days_diff} giorni)")
     
-    st.caption(f"{period_type} | {start_date.strftime('%d/%m/%Y')} - {end_date.strftime('%d/%m/%Y')}")
+    # Show if different from applied state
+    _render_pending_vs_applied_indicator(real_account_id)
+    
+    return {
+        'start_date': current_start,
+        'end_date': current_end,
+        'configured': True,
+        'state': 'pending'
+    }
+
+
+def _render_pending_vs_applied_indicator(account_id: str):
+    """Show indicator if pending state differs from applied state."""
+    pending_start = st.session_state.get(f"pending_start_{account_id}")
+    pending_end = st.session_state.get(f"pending_end_{account_id}")
+    
+    applied_start = st.session_state.get(f"applied_start_{account_id}")
+    applied_end = st.session_state.get(f"applied_end_{account_id}")
+    
+    if (pending_start != applied_start or pending_end != applied_end):
+        if applied_start and applied_end:
+            st.info(f"📋 **Applicato**: {applied_start} → {applied_end}")
+            st.warning("⚠️ Modifiche non applicate - clicca 'Update Metrics'")
+        else:
+            st.info("🆕 Nuova configurazione - clicca 'Update Metrics' per applicare")
 
 
 def get_period_info_for_display(account_id: str) -> Dict[str, Any]:
-    """
-    Get period information formatted for display.
+    """Get period information formatted for display (uses pending state)."""
+    pending_start_key = f"pending_start_{account_id}"
+    pending_end_key = f"pending_end_{account_id}"
     
-    Args:
-        account_id: Account identifier
-        
-    Returns:
-        Dict with period display information
-    """
-    period_config = get_period_configuration(account_id)
+    start_date = st.session_state.get(pending_start_key)
+    end_date = st.session_state.get(pending_end_key)
     
-    if not period_config:
+    if not start_date or not end_date:
         return {
             'configured': False,
             'message': 'Periodo non configurato'
         }
     
-    start_date = period_config['start_date']
-    end_date = period_config['end_date']
     days_span = (end_date - start_date).days
     
     return {
@@ -172,57 +160,97 @@ def get_period_info_for_display(account_id: str) -> Dict[str, Any]:
         'end_date': end_date,
         'days_span': days_span,
         'formatted_range': f"{start_date.strftime('%d/%m/%Y')} - {end_date.strftime('%d/%m/%Y')}",
-        'period_type': _get_period_type(days_span)
+        'state': 'pending'
     }
 
 
-def _get_period_type(days_span: int) -> str:
-    """
-    Get period type based on number of days.
-    
-    Args:
-        days_span: Number of days in period
-        
-    Returns:
-        Period type string
-    """
-    if days_span <= 7:
-        return "week"
-    elif days_span <= 31:
-        return "month"
-    elif days_span <= 93:
-        return "quarter"
-    elif days_span <= 366:
-        return "year"
-    else:
-        return "multi_year"
-
-
 def reset_period_to_default(account_id: str, trades_df: pd.DataFrame) -> bool:
-    """
-    Reset period selection to default (30 days).
-    
-    Args:
-        account_id: Account identifier
-        trades_df: Trades DataFrame for date range
-        
-    Returns:
-        True if reset was successful
-    """
+    """Reset PENDING period selection to default (30 days)."""
     if trades_df.empty:
         return False
     
-    min_date = trades_df['OpenDatetime'].min().date()
-    max_date = trades_df['OpenDatetime'].max().date()
+    data_start = trades_df['OpenDatetime'].min().date()
+    data_end = trades_df['OpenDatetime'].max().date()
     
-    # Calcola default e aggiorna widget
-    default_start, default_end = calculate_preset_dates("30d", min_date, max_date)
-    st.session_state[f"date_start_{account_id}"] = default_start
-    st.session_state[f"date_end_{account_id}"] = default_end
+    default_end = min(datetime.now().date(), data_end)
+    default_start = max(data_start, default_end - timedelta(days=30))
+    
+    # Reset pending state (applied state unchanged until Update button)
+    st.session_state[f"pending_start_{account_id}"] = default_start
+    st.session_state[f"pending_end_{account_id}"] = default_end
     
     return True
 
 
-# REMOVED FUNCTIONS (no longer needed):
-# - render_preset_buttons() 
-# - All preset button logic and PERIOD_PRESETS dependencies
+def render_period_quick_presets(account_id: str, trades_df: pd.DataFrame):
+    """
+    Render quick preset buttons for common periods.
+    Updates pending state only.
+    
+    Args:
+        account_id: Account identifier
+        trades_df: Complete trades DataFrame
+    """
+    if trades_df.empty:
+        return
+    
+    st.markdown("**🚀 Preset Rapidi:**")
+    
+    data_start = trades_df['OpenDatetime'].min().date()
+    data_end = trades_df['OpenDatetime'].max().date()
+    today = min(datetime.now().date(), data_end)
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        if st.button("7D", key=f"preset_7d_{account_id}", width='stretch'):
+            _apply_preset_to_pending(account_id, today, data_start, 7)
+    
+    with col2:
+        if st.button("30D", key=f"preset_30d_{account_id}", width='stretch'):
+            _apply_preset_to_pending(account_id, today, data_start, 30)
+    
+    with col3:
+        if st.button("90D", key=f"preset_90d_{account_id}", width='stretch'):
+            _apply_preset_to_pending(account_id, today, data_start, 90)
+    
+    with col4:
+        if st.button("YTD", key=f"preset_ytd_{account_id}", width='stretch'):
+            year_start = datetime(today.year, 1, 1).date()
+            ytd_start = max(data_start, year_start)
+            _apply_preset_to_pending(account_id, today, ytd_start, None)
+
+
+def _apply_preset_to_pending(account_id: str, end_date: date, data_start: date, days: int):
+    """Apply preset to pending state only."""
+    if days is None:  # YTD case
+        preset_start = data_start
+    else:
+        preset_start = max(data_start, end_date - timedelta(days=days))
+    
+    st.session_state[f"pending_start_{account_id}"] = preset_start
+    st.session_state[f"pending_end_{account_id}"] = end_date
+    
+    st.success(f"✅ Preset applicato al pending state!")
+
+
+def get_pending_period_summary(account_id: str) -> str:
+    """Get summary of pending period configuration."""
+    pending_start = st.session_state.get(f"pending_start_{account_id}")
+    pending_end = st.session_state.get(f"pending_end_{account_id}")
+    
+    applied_start = st.session_state.get(f"applied_start_{account_id}")
+    applied_end = st.session_state.get(f"applied_end_{account_id}")
+    
+    if not pending_start or not pending_end:
+        return "Periodo non configurato"
+    
+    days_span = (pending_end - pending_start).days
+    summary = f"Pending: {days_span} giorni"
+    
+    if pending_start != applied_start or pending_end != applied_end:
+        summary += " (⚠️ Non applicato)"
+    else:
+        summary += " (✅ Applicato)"
+    
+    return summary

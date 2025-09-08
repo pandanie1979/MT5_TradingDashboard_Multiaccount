@@ -1,11 +1,10 @@
-﻿# MT5 Trading Dashboard - Session State Helpers
+﻿# MT5 Trading Dashboard - Session State Helpers (DUAL STATE SYSTEM)
 # File: tabs/performance/utils/session_helpers.py
-# Generated: September 2025
-# Refactoring: v1.4 -> v1.5
+# Modified: September 2025 - Added dual state (pending/applied) system
 
 """
 Session state management utilities for performance tab.
-Handles period configuration, setup selection, and filter management.
+ADDED: Dual state system with pending/applied separation for manual updates.
 """
 
 import streamlit as st
@@ -19,28 +18,89 @@ from ..config.constants import (
 )
 
 
-# AGGIORNAMENTO alla funzione get_period_configuration
-def get_period_configuration(account_id: str) -> Optional[Dict[str, Any]]:
+# ============================================================================
+# DUAL STATE SYSTEM - Core Functions
+# ============================================================================
+
+def detect_pending_changes(account_id: str) -> bool:
     """
-    Ottiene la configurazione del periodo dai widget (non session state).
-    UPDATED: Marca automaticamente come modificato dall'utente quando accede ai widget.
-    """
-    # Usa chiavi widget
-    start_widget_key = f"date_start_{account_id}"
-    end_widget_key = f"date_end_{account_id}"
+    Detect if there are pending changes not yet applied.
     
-    start_date = st.session_state.get(start_widget_key)
-    end_date = st.session_state.get(end_widget_key)
+    Args:
+        account_id: Account identifier
+        
+    Returns:
+        True if pending state differs from applied state
+    """
+    # Check period changes
+    period_changed = _detect_period_changes(account_id)
+    
+    # Check setup changes  
+    setup_changed = _detect_setup_changes(account_id)
+    
+    return period_changed or setup_changed
+
+
+def apply_pending_changes(account_id: str) -> Dict[str, int]:
+    """
+    Apply all pending changes to applied state.
+    
+    Args:
+        account_id: Account identifier
+        
+    Returns:
+        Dict with counts of applied changes
+    """
+    changes_applied = {
+        'period_changes': 0,
+        'setup_changes': 0,
+        'total_changes': 0
+    }
+    
+    # Apply period changes
+    if _apply_pending_period(account_id):
+        changes_applied['period_changes'] = 1
+    
+    # Apply setup changes
+    setup_count = _apply_pending_setups(account_id)
+    changes_applied['setup_changes'] = setup_count
+    
+    changes_applied['total_changes'] = changes_applied['period_changes'] + changes_applied['setup_changes']
+    
+    return changes_applied
+
+
+def get_applied_period_configuration(account_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Get the APPLIED period configuration (used by charts/metrics).
+    
+    Args:
+        account_id: Account identifier
+        
+    Returns:
+        Dict with applied period configuration or None
+    """
+    start_key = f"applied_start_{account_id}"
+    end_key = f"applied_end_{account_id}"
+    
+    start_date = st.session_state.get(start_key)
+    end_date = st.session_state.get(end_key)
+    
+    # Fallback to old keys for backward compatibility
+    if start_date is None:
+        old_start_key = f"date_start_{account_id}"
+        start_date = st.session_state.get(old_start_key)
+        if start_date:
+            st.session_state[start_key] = start_date  # Auto-migrate
+    
+    if end_date is None:
+        old_end_key = f"date_end_{account_id}"
+        end_date = st.session_state.get(old_end_key)
+        if end_date:
+            st.session_state[end_key] = end_date  # Auto-migrate
     
     if not start_date or not end_date:
         return None
-    
-    # NUOVO: Se l'utente sta usando la configurazione periodo, marcala come user-modified
-    # per proteggerla da reset futuri
-    period_initialized_key = f"period_user_set_{account_id}"
-    if st.session_state.get(period_initialized_key) == "auto_default":
-        # Solo la prima volta che accede, marcala come user-accessed
-        st.session_state[period_initialized_key] = "user_accessed"
     
     return {
         'start_date': start_date,
@@ -48,43 +108,244 @@ def get_period_configuration(account_id: str) -> Optional[Dict[str, Any]]:
         'start_datetime': pd.to_datetime(start_date),
         'end_datetime': pd.to_datetime(end_date) + pd.Timedelta(days=1)
     }
-    
-def get_selected_setups(account_id: str) -> List[int]:
+
+
+def get_applied_selected_setups(account_id: str) -> List[int]:
     """
-    Ottiene la lista dei setup selezionati dalla session state.
+    Get the APPLIED setup selection (used by charts/metrics).
     
     Args:
-        account_id: ID dell'account
+        account_id: Account identifier
         
     Returns:
-        Lista di magic numbers selezionati
+        List of applied selected magic numbers
     """
     selected_setups = []
     
-    # Cerca tutte le chiavi che iniziano con setup_{account_id}_
+    # Search for applied setup keys
     for key in st.session_state:
-        if key.startswith(f"setup_{account_id}_") and st.session_state[key]:
-            # Estrai magic number dalla chiave
-            magic_str = key.replace(f"setup_{account_id}_", "").replace("_cb_", "_").split("_")[0]
+        if key.startswith(f"applied_setup_{account_id}_") and st.session_state[key]:
+            magic_str = key.replace(f"applied_setup_{account_id}_", "").split("_")[0]
             try:
                 magic_number = int(magic_str)
                 selected_setups.append(magic_number)
             except ValueError:
                 continue
     
+    # Fallback to old keys for backward compatibility
+    if not selected_setups:
+        for key in st.session_state:
+            if key.startswith(f"setup_{account_id}_") and st.session_state[key]:
+                magic_str = key.replace(f"setup_{account_id}_", "").split("_")[0]
+                try:
+                    magic_number = int(magic_str)
+                    selected_setups.append(magic_number)
+                    # Auto-migrate
+                    applied_key = f"applied_setup_{account_id}_{magic_number}"
+                    st.session_state[applied_key] = True
+                except ValueError:
+                    continue
+    
     return selected_setups
 
 
-def get_advanced_filters(account_id: str) -> Dict[str, Any]:
+def get_current_period_trades(trades_df: pd.DataFrame, account_id: str) -> pd.DataFrame:
     """
-    Ottiene i filtri avanzati dalla session state.
+    Get trades filtered by APPLIED period and setup selection.
+    MODIFIED: Uses applied state instead of pending state.
     
     Args:
-        account_id: ID dell'account
+        trades_df: Complete trades DataFrame
+        account_id: Account identifier
         
     Returns:
-        Dict con configurazione filtri
+        DataFrame filtered by applied period and setup selection
     """
+    if trades_df.empty:
+        return trades_df
+    
+    # Apply period filter using APPLIED configuration
+    period_config = get_applied_period_configuration(account_id)
+    if period_config:
+        filtered_df = trades_df[
+            (trades_df['OpenDatetime'] >= period_config['start_datetime']) & 
+            (trades_df['OpenDatetime'] <= period_config['end_datetime'])
+        ]
+    else:
+        filtered_df = trades_df
+    
+    # Apply setup filter using APPLIED selection
+    selected_setups = get_applied_selected_setups(account_id)
+    if selected_setups:
+        filtered_df = filtered_df[filtered_df['MagicNumber'].isin(selected_setups)]
+    
+    return filtered_df
+
+
+# ============================================================================
+# PRIVATE HELPER FUNCTIONS
+# ============================================================================
+
+def _detect_period_changes(account_id: str) -> bool:
+    """Check if period configuration has pending changes."""
+    pending_start = st.session_state.get(f"pending_start_{account_id}")
+    pending_end = st.session_state.get(f"pending_end_{account_id}")
+    
+    applied_start = st.session_state.get(f"applied_start_{account_id}")
+    applied_end = st.session_state.get(f"applied_end_{account_id}")
+    
+    return pending_start != applied_start or pending_end != applied_end
+
+
+def _detect_setup_changes(account_id: str) -> bool:
+    """Check if setup selection has pending changes."""
+    # Get all pending setup keys
+    pending_setups = {}
+    for key in st.session_state:
+        if key.startswith(f"pending_setup_{account_id}_"):
+            magic_str = key.replace(f"pending_setup_{account_id}_", "").split("_")[0]
+            try:
+                magic_number = int(magic_str)
+                pending_setups[magic_number] = st.session_state[key]
+            except ValueError:
+                continue
+    
+    # Get all applied setup keys
+    applied_setups = {}
+    for key in st.session_state:
+        if key.startswith(f"applied_setup_{account_id}_"):
+            magic_str = key.replace(f"applied_setup_{account_id}_", "").split("_")[0]
+            try:
+                magic_number = int(magic_str)
+                applied_setups[magic_number] = st.session_state[key]
+            except ValueError:
+                continue
+    
+    return pending_setups != applied_setups
+
+
+def _apply_pending_period(account_id: str) -> bool:
+    """Apply pending period changes to applied state."""
+    pending_start = st.session_state.get(f"pending_start_{account_id}")
+    pending_end = st.session_state.get(f"pending_end_{account_id}")
+    
+    if pending_start is not None:
+        st.session_state[f"applied_start_{account_id}"] = pending_start
+    
+    if pending_end is not None:
+        st.session_state[f"applied_end_{account_id}"] = pending_end
+    
+    return pending_start is not None or pending_end is not None
+
+
+def _apply_pending_setups(account_id: str) -> int:
+    """Apply pending setup changes to applied state."""
+    changes_count = 0
+    
+    # Copy all pending setup states to applied
+    for key in list(st.session_state.keys()):
+        if key.startswith(f"pending_setup_{account_id}_"):
+            applied_key = key.replace("pending_", "applied_")
+            st.session_state[applied_key] = st.session_state[key]
+            changes_count += 1
+    
+    return changes_count
+
+
+# ============================================================================
+# INITIALIZATION AND COMPATIBILITY
+# ============================================================================
+
+def initialize_dual_state_for_account(account_id: str, trades_df: pd.DataFrame):
+    """
+    Initialize dual state system for an account.
+    Creates both pending and applied states with same initial values.
+    
+    Args:
+        account_id: Account identifier
+        trades_df: Complete trades DataFrame for date range calculation
+    """
+    # Initialize period state
+    _initialize_period_dual_state(account_id, trades_df)
+    
+    # Initialize setup state
+    _initialize_setup_dual_state(account_id, trades_df)
+
+
+def _initialize_period_dual_state(account_id: str, trades_df: pd.DataFrame):
+    """Initialize period dual state."""
+    pending_start_key = f"pending_start_{account_id}"
+    pending_end_key = f"pending_end_{account_id}"
+    applied_start_key = f"applied_start_{account_id}"
+    applied_end_key = f"applied_end_{account_id}"
+    
+    # Calculate default period if not exists
+    if (pending_start_key not in st.session_state or 
+        applied_start_key not in st.session_state):
+        
+        if not trades_df.empty:
+            data_start = trades_df['OpenDatetime'].min().date()
+            data_end = trades_df['OpenDatetime'].max().date()
+            
+            default_end = min(datetime.now().date(), data_end)
+            default_start = max(data_start, default_end - timedelta(days=30))
+        else:
+            default_end = datetime.now().date()
+            default_start = default_end - timedelta(days=30)
+        
+        # Initialize both pending and applied with same values
+        st.session_state[pending_start_key] = default_start
+        st.session_state[pending_end_key] = default_end
+        st.session_state[applied_start_key] = default_start
+        st.session_state[applied_end_key] = default_end
+
+
+def _initialize_setup_dual_state(account_id: str, trades_df: pd.DataFrame):
+    """Initialize setup dual state."""
+    if trades_df.empty:
+        return
+    
+    # Get all available magic numbers
+    magic_numbers = trades_df['MagicNumber'].unique()
+    
+    for magic_number in magic_numbers:
+        pending_key = f"pending_setup_{account_id}_{magic_number}"
+        applied_key = f"applied_setup_{account_id}_{magic_number}"
+        
+        # Initialize both with default selection (True)
+        if pending_key not in st.session_state:
+            st.session_state[pending_key] = DEFAULTS["setup_selected"]
+        
+        if applied_key not in st.session_state:
+            st.session_state[applied_key] = DEFAULTS["setup_selected"]
+
+
+# ============================================================================
+# LEGACY COMPATIBILITY FUNCTIONS (kept for backward compatibility)
+# ============================================================================
+
+def get_period_configuration(account_id: str) -> Optional[Dict[str, Any]]:
+    """Legacy function - redirects to applied configuration."""
+    return get_applied_period_configuration(account_id)
+
+
+def get_selected_setups(account_id: str) -> List[int]:
+    """Legacy function - redirects to applied selection."""
+    return get_applied_selected_setups(account_id)
+
+
+def mark_period_as_user_modified(account_id: str):
+    """Legacy function - kept for compatibility but no longer used."""
+    period_initialized_key = f"period_user_set_{account_id}"
+    st.session_state[period_initialized_key] = "user_modified"
+
+
+# ============================================================================
+# OTHER EXISTING FUNCTIONS (unchanged)
+# ============================================================================
+
+def get_advanced_filters(account_id: str) -> Dict[str, Any]:
+    """Get advanced filters from session state (unchanged)."""
     return {
         'trade_type': st.session_state.get(
             get_session_key("trade_type_filter", account_id), "Tutti"
@@ -101,44 +362,9 @@ def get_advanced_filters(account_id: str) -> Dict[str, Any]:
     }
 
 
-def apply_period_filters(trades_df: pd.DataFrame, 
-                        period_config: Optional[Dict[str, Any]]) -> pd.DataFrame:
-    """
-    Applica i filtri temporali ai trade.
-    
-    Args:
-        trades_df: DataFrame con i trade
-        period_config: Configurazione periodo (da get_period_configuration)
-        
-    Returns:
-        DataFrame filtrato per periodo
-    """
-    if not period_config or trades_df.empty:
-        return trades_df
-    
-    return trades_df[
-        (trades_df['OpenDatetime'] >= period_config['start_datetime']) & 
-        (trades_df['OpenDatetime'] <= period_config['end_datetime'])
-    ]
-
-
 def apply_advanced_filters(trades_df: pd.DataFrame, 
                           filters: Dict[str, Any]) -> pd.DataFrame:
-    """
-    Applica i filtri avanzati ai trade.
-    
-    IMPORTANTE: 
-    - Filtri profit/drawdown si applicano a livello SETUP (magic number)
-    - Filtro simboli si applica a livello TRADE singolo
-    - Filtro tipo trade si applica a livello TRADE singolo
-    
-    Args:
-        trades_df: DataFrame con i trade
-        filters: Configurazione filtri
-        
-    Returns:
-        DataFrame filtrato
-    """
+    """Apply advanced filters to trades (unchanged)."""
     if trades_df.empty:
         return trades_df
     
@@ -167,18 +393,29 @@ def apply_advanced_filters(trades_df: pd.DataFrame,
     return filtered_df
 
 
-def calculate_preset_dates(preset: str, min_date: date, max_date: date) -> Tuple[date, date]:
+def apply_period_filters(trades_df: pd.DataFrame, 
+                        period_config: Optional[Dict[str, Any]]) -> pd.DataFrame:
     """
-    Calcola le date di default basate sul preset selezionato.
+    Apply period filters to trades (uses applied configuration).
     
     Args:
-        preset: Tipo di preset (7d, 30d, 90d, ytd)
-        min_date: Data minima disponibile
-        max_date: Data massima disponibile
+        trades_df: DataFrame with trades
+        period_config: Period configuration (from get_applied_period_configuration)
         
     Returns:
-        Tupla (start_date, end_date)
+        DataFrame filtered by period
     """
+    if not period_config or trades_df.empty:
+        return trades_df
+    
+    return trades_df[
+        (trades_df['OpenDatetime'] >= period_config['start_datetime']) & 
+        (trades_df['OpenDatetime'] <= period_config['end_datetime'])
+    ]
+
+
+def calculate_preset_dates(preset: str, min_date: date, max_date: date) -> Tuple[date, date]:
+    """Calculate default dates based on selected preset (unchanged)."""
     end_date = max_date
     
     if preset in PERIOD_PRESETS:
@@ -194,197 +431,65 @@ def calculate_preset_dates(preset: str, min_date: date, max_date: date) -> Tuple
     return start_date, end_date
 
 
-def get_current_period_trades(trades_df: pd.DataFrame, account_id: str) -> pd.DataFrame:
-    """
-    Ottiene i trade filtrati per il periodo corrente.
-    CLEANED: Removed debug prints for production use.
-    
-    Args:
-        trades_df: DataFrame with trades
-        account_id: Account identifier
-        
-    Returns:
-        DataFrame filtered by current period selection
-    """
-    start_widget_key = f"date_start_{account_id}"
-    end_widget_key = f"date_end_{account_id}"
-    
-    # Check if widget keys exist in session state
-    if start_widget_key in st.session_state and end_widget_key in st.session_state:
-        start_date = st.session_state[start_widget_key]
-        end_date = st.session_state[end_widget_key]
-        
-        # Convert to datetime for filtering
-        start_datetime = pd.to_datetime(start_date)
-        end_datetime = pd.to_datetime(end_date) + pd.Timedelta(days=1)
-        
-        # Apply period filter
-        filtered_df = trades_df[
-            (trades_df['OpenDatetime'] >= start_datetime) & 
-            (trades_df['OpenDatetime'] <= end_datetime)
-        ]
-        
-        return filtered_df
-    else:
-        # If no period selection exists, return all trades
-        # This allows the period widgets to initialize properly
-        return trades_df
-
-
-def initialize_session_defaults(account_id: str, trades_df: pd.DataFrame):
-    """
-    Inizializza SOLO se NULLA è configurato dall'utente.
-    FIXED: Protegge le date impostate dall'utente da reset involontari.
-    """
-    # Sidebar width
-    sidebar_width_key = get_session_key("sidebar_width", account_id)
-    if sidebar_width_key not in st.session_state:
-        st.session_state[sidebar_width_key] = DEFAULTS["sidebar_width"]
-    
-    # CRITICO: Periodo date - PROTETTO da sovrascrittura
-    start_widget_key = f"date_start_{account_id}"
-    end_widget_key = f"date_end_{account_id}"
-    
-    # NUOVO: Controlla se l'utente ha mai impostato date custom
-    period_initialized_key = f"period_user_set_{account_id}"
-    
-    # Solo se NON ci sono widget period attivi E l'utente non li ha mai toccati
-    if (start_widget_key not in st.session_state and 
-        end_widget_key not in st.session_state and
-        period_initialized_key not in st.session_state):
-        
-        if not trades_df.empty:
-            min_date = trades_df['OpenDatetime'].min().date()
-            max_date = trades_df['OpenDatetime'].max().date()
-            default_start, default_end = calculate_preset_dates("30d", min_date, max_date)
-            
-            # Inizializza i widget per la PRIMA volta
-            st.session_state[start_widget_key] = default_start
-            st.session_state[end_widget_key] = default_end
-            
-            # IMPORTANTE: Marca che sono stati inizializzati ma non ancora toccati dall'utente
-            st.session_state[period_initialized_key] = "auto_default"
-    
-    # Setup selections (questo può rimanere come prima)
-    if not trades_df.empty:
-        for magic_number in trades_df['MagicNumber'].unique():
-            setup_key = f"setup_{account_id}_{magic_number}"
-            if setup_key not in st.session_state:
-                st.session_state[setup_key] = DEFAULTS["setup_selected"]
-
-
-def mark_period_as_user_modified(account_id: str):
-    """
-    Marca che l'utente ha modificato manualmente il periodo.
-    Questo previene reset automatici futuri.
-    """
-    period_initialized_key = f"period_user_set_{account_id}"
-    st.session_state[period_initialized_key] = "user_modified"
-
-
 def get_sidebar_width(account_id: str) -> int:
-    """
-    Ottiene la larghezza della sidebar per un account, con validazione.
-    
-    Args:
-        account_id: ID dell'account
-        
-    Returns:
-        Larghezza sidebar validata
-    """
+    """Get sidebar width for account with validation (unchanged)."""
     width_key = get_session_key("sidebar_width", account_id)
     width = st.session_state.get(width_key, DEFAULTS["sidebar_width"])
     return validate_sidebar_width(width)
 
 
 def set_sidebar_width(account_id: str, width: int) -> bool:
-    """
-    Imposta la larghezza della sidebar per un account.
-    
-    Args:
-        account_id: ID dell'account
-        width: Nuova larghezza (verrà validata)
-        
-    Returns:
-        True se l'impostazione è riuscita
-    """
+    """Set sidebar width for account (unchanged)."""
     validated_width = validate_sidebar_width(width)
     width_key = get_session_key("sidebar_width", account_id)
     st.session_state[width_key] = validated_width
     return True
 
 
-def update_period_preset(account_id: str, preset: str, 
-                        min_date: date, max_date: date) -> bool:
-    """
-    Aggiorna il preset del periodo e calcola le date corrispondenti.
-    
-    Args:
-        account_id: ID dell'account
-        preset: Tipo di preset (7d, 30d, 90d, ytd)
-        min_date: Data minima disponibile
-        max_date: Data massima disponibile
-        
-    Returns:
-        True se l'aggiornamento è riuscito
-    """
-    preset_key = get_session_key("period_preset", account_id)
-    start_date_key = get_session_key("period_start", account_id)
-    end_date_key = get_session_key("period_end", account_id)
-    
-    # Aggiorna preset
-    st.session_state[preset_key] = preset
-    
-    # Calcola e aggiorna date
-    start_date, end_date = calculate_preset_dates(preset, min_date, max_date)
-    st.session_state[start_date_key] = start_date
-    st.session_state[end_date_key] = end_date
-    
-    return True
-
-
 def toggle_all_setups(account_id: str, magic_numbers: List[int], 
                      select_all: bool = True) -> int:
     """
-    Seleziona o deseleziona tutti i setup per un account.
+    Toggle all setups for an account (LEGACY - uses applied keys).
     
     Args:
-        account_id: ID dell'account
-        magic_numbers: Lista di magic numbers disponibili
-        select_all: True per selezionare tutti, False per deselezionare
+        account_id: Account ID
+        magic_numbers: List of available magic numbers
+        select_all: True to select all, False to deselect
         
     Returns:
-        Numero di setup modificati
+        Number of setups modified
     """
     modified_count = 0
     
     for magic_number in magic_numbers:
-        setup_key = f"setup_{account_id}_{magic_number}"
-        if setup_key in st.session_state:
-            st.session_state[setup_key] = select_all
-            modified_count += 1
+        setup_key = f"applied_setup_{account_id}_{magic_number}"
+        st.session_state[setup_key] = select_all
+        modified_count += 1
     
     return modified_count
 
 
 def invert_setup_selection(account_id: str, magic_numbers: List[int]) -> int:
     """
-    Inverte la selezione di tutti i setup per un account.
+    Invert setup selection for an account (LEGACY - uses applied keys).
     
     Args:
-        account_id: ID dell'account
-        magic_numbers: Lista di magic numbers disponibili
+        account_id: Account ID
+        magic_numbers: List of available magic numbers
         
     Returns:
-        Numero di setup modificati
+        Number of setups modified
     """
     modified_count = 0
     
     for magic_number in magic_numbers:
-        setup_key = f"setup_{account_id}_{magic_number}"
+        setup_key = f"applied_setup_{account_id}_{magic_number}"
         if setup_key in st.session_state:
             current_value = st.session_state[setup_key]
             st.session_state[setup_key] = not current_value
+            modified_count += 1
+        else:
+            st.session_state[setup_key] = True
             modified_count += 1
     
     return modified_count
@@ -392,13 +497,13 @@ def invert_setup_selection(account_id: str, magic_numbers: List[int]) -> int:
 
 def get_setup_search_term(account_id: str) -> str:
     """
-    Ottiene il termine di ricerca per i setup.
+    Get search term for setups.
     
     Args:
-        account_id: ID dell'account
+        account_id: Account ID
         
     Returns:
-        Termine di ricerca attuale
+        Current search term
     """
     search_key = get_session_key("setup_search", account_id)
     return st.session_state.get(search_key, "")
@@ -406,20 +511,20 @@ def get_setup_search_term(account_id: str) -> str:
 
 def validate_date_range(start_date: date, end_date: date) -> Tuple[bool, str]:
     """
-    Valida un range di date.
+    Validate a date range.
     
     Args:
-        start_date: Data di inizio
-        end_date: Data di fine
+        start_date: Start date
+        end_date: End date
         
     Returns:
-        Tupla (is_valid, error_message)
+        Tuple (is_valid, error_message)
     """
     if start_date > end_date:
         return False, "Data inizio deve essere ≤ data fine"
     
-    # Verifica che il range non sia troppo grande (es. > 2 anni)
-    max_days = 730  # 2 anni
+    # Check range is not too large (e.g. > 2 years)
+    max_days = 730  # 2 years
     if (end_date - start_date).days > max_days:
         return False, f"Range massimo consentito: {max_days} giorni"
     
@@ -428,21 +533,21 @@ def validate_date_range(start_date: date, end_date: date) -> Tuple[bool, str]:
 
 def get_filter_summary(account_id: str) -> str:
     """
-    Ottiene un riassunto testuale dei filtri attivi.
+    Get textual summary of active filters.
     
     Args:
-        account_id: ID dell'account
+        account_id: Account ID
         
     Returns:
-        String con riassunto filtri
+        String with filter summary
     """
     filters = get_advanced_filters(account_id)
-    period_config = get_period_configuration(account_id)
-    selected_setups = get_selected_setups(account_id)
+    period_config = get_applied_period_configuration(account_id)
+    selected_setups = get_applied_selected_setups(account_id)
     
     summary_parts = []
     
-    # Periodo
+    # Period
     if period_config:
         days = (period_config['end_date'] - period_config['start_date']).days
         summary_parts.append(f"Periodo: {days} giorni")
@@ -451,18 +556,18 @@ def get_filter_summary(account_id: str) -> str:
     if selected_setups:
         summary_parts.append(f"Setup: {len(selected_setups)} selezionati")
     
-    # Tipo trade
+    # Trade type
     if filters['trade_type'] != "Tutti":
         summary_parts.append(f"Tipo: {filters['trade_type']}")
     
-    # Filtri numerici
+    # Numeric filters
     if filters['min_profit'] is not None:
         summary_parts.append(f"Min Profit: €{filters['min_profit']}")
     
     if filters['max_drawdown'] is not None:
         summary_parts.append(f"Max DD: €{filters['max_drawdown']}")
     
-    # Simboli
+    # Symbols
     if filters['selected_symbols']:
         symbol_count = len(filters['selected_symbols'])
         summary_parts.append(f"Simboli: {symbol_count}")
@@ -472,22 +577,22 @@ def get_filter_summary(account_id: str) -> str:
 
 def clear_account_session_state(account_id: str) -> int:
     """
-    Pulisce tutti i dati di session state per un account specifico.
+    Clear all session state data for a specific account.
     
     Args:
-        account_id: ID dell'account
+        account_id: Account ID
         
     Returns:
-        Numero di chiavi rimosse
+        Number of keys removed
     """
     keys_to_remove = []
     
-    # Trova tutte le chiavi che contengono l'account_id
+    # Find all keys containing the account_id
     for key in st.session_state.keys():
         if account_id in key:
             keys_to_remove.append(key)
     
-    # Rimuovi le chiavi
+    # Remove keys
     for key in keys_to_remove:
         del st.session_state[key]
     
@@ -496,22 +601,23 @@ def clear_account_session_state(account_id: str) -> int:
 
 def export_session_config(account_id: str) -> Dict[str, Any]:
     """
-    Esporta la configurazione di session state per un account.
+    Export session state configuration for an account.
     
     Args:
-        account_id: ID dell'account
+        account_id: Account ID
         
     Returns:
-        Dict con configurazione esportabile
+        Dict with exportable configuration
     """
     config = {
         'account_id': account_id,
         'export_timestamp': datetime.now().isoformat(),
         'sidebar_width': get_sidebar_width(account_id),
-        'period_config': get_period_configuration(account_id),
-        'selected_setups': get_selected_setups(account_id),
+        'applied_period_config': get_applied_period_configuration(account_id),
+        'applied_selected_setups': get_applied_selected_setups(account_id),
         'advanced_filters': get_advanced_filters(account_id),
-        'search_term': get_setup_search_term(account_id)
+        'search_term': get_setup_search_term(account_id),
+        'pending_changes': detect_pending_changes(account_id)
     }
     
     return config
@@ -519,40 +625,43 @@ def export_session_config(account_id: str) -> Dict[str, Any]:
 
 def import_session_config(account_id: str, config: Dict[str, Any]) -> bool:
     """
-    Importa una configurazione di session state per un account.
+    Import session state configuration for an account.
     
     Args:
-        account_id: ID dell'account
-        config: Dict con configurazione da importare
+        account_id: Account ID
+        config: Dict with configuration to import
         
     Returns:
-        True se l'importazione è riuscita
+        True if import was successful
     """
     try:
         # Sidebar width
         if 'sidebar_width' in config:
             set_sidebar_width(account_id, config['sidebar_width'])
         
-        # Period config
-        if 'period_config' in config and config['period_config']:
-            period_config = config['period_config']
-            start_date_key = get_session_key("period_start", account_id)
-            end_date_key = get_session_key("period_end", account_id)
+        # Applied period config
+        if 'applied_period_config' in config and config['applied_period_config']:
+            period_config = config['applied_period_config']
+            st.session_state[f"applied_start_{account_id}"] = period_config['start_date']
+            st.session_state[f"applied_end_{account_id}"] = period_config['end_date']
             
-            st.session_state[start_date_key] = period_config['start_date']
-            st.session_state[end_date_key] = period_config['end_date']
+            # Also set pending to same values
+            st.session_state[f"pending_start_{account_id}"] = period_config['start_date']
+            st.session_state[f"pending_end_{account_id}"] = period_config['end_date']
         
-        # Setup selections
-        if 'selected_setups' in config:
-            # Prima deseleziona tutti
-            for key in st.session_state.keys():
-                if key.startswith(f"setup_{account_id}_"):
+        # Applied setup selections
+        if 'applied_selected_setups' in config:
+            # First clear existing selections
+            for key in list(st.session_state.keys()):
+                if key.startswith(f"applied_setup_{account_id}_"):
+                    st.session_state[key] = False
+                if key.startswith(f"pending_setup_{account_id}_"):
                     st.session_state[key] = False
             
-            # Poi seleziona quelli specificati
-            for magic_number in config['selected_setups']:
-                setup_key = f"setup_{account_id}_{magic_number}"
-                st.session_state[setup_key] = True
+            # Set selected setups
+            for magic_number in config['applied_selected_setups']:
+                st.session_state[f"applied_setup_{account_id}_{magic_number}"] = True
+                st.session_state[f"pending_setup_{account_id}_{magic_number}"] = True
         
         # Advanced filters
         if 'advanced_filters' in config:
@@ -579,26 +688,84 @@ def import_session_config(account_id: str, config: Dict[str, Any]) -> bool:
     except Exception as e:
         st.error(f"Errore nell'importazione configurazione: {str(e)}")
         return False
-    
+
+
 def cleanup_large_session_objects(account_id: str, max_objects: int = 50):
     """
-    Pulisce oggetti di sessione troppo grandi o vecchi.
+    Clean up large or old session objects.
     
     Args:
         account_id: Account identifier
-        max_objects: Numero massimo oggetti per account
+        max_objects: Maximum number of objects per account
     """
     account_keys = [k for k in st.session_state.keys() if account_id in k]
     
-    # Rimuovi oggetti più vecchi se troppi
+    # Remove older objects if too many
     if len(account_keys) > max_objects:
-        # Ordina per timestamp se disponibile, altrimenti per nome
         sorted_keys = sorted(account_keys)
         keys_to_remove = sorted_keys[:-max_objects]
         
         for key in keys_to_remove:
             del st.session_state[key]
         
-        st.info(f"🧹 Puliti {len(keys_to_remove)} oggetti sessione obsoleti")
+        st.info(f"Puliti {len(keys_to_remove)} oggetti sessione obsoleti")
 
-# Chiamare questa funzione in render() main
+
+def reset_period_selection_to_default(account_id: str, trades_df: pd.DataFrame) -> bool:
+    """
+    Reset period selection to default values (both pending and applied).
+    
+    Args:
+        account_id: Account identifier
+        trades_df: DataFrame for date range calculation
+        
+    Returns:
+        True if reset was successful
+    """
+    if trades_df.empty:
+        return False
+    
+    # Calculate range
+    data_start = trades_df['OpenDatetime'].min().date()
+    data_end = trades_df['OpenDatetime'].max().date()
+    
+    # Calculate default (last 30 days)
+    default_end = min(datetime.now().date(), data_end)
+    default_start = max(data_start, default_end - timedelta(days=30))
+    
+    # Update both pending and applied
+    st.session_state[f"pending_start_{account_id}"] = default_start
+    st.session_state[f"pending_end_{account_id}"] = default_end
+    st.session_state[f"applied_start_{account_id}"] = default_start
+    st.session_state[f"applied_end_{account_id}"] = default_end
+    
+    return True
+
+
+def get_dual_state_summary(account_id: str) -> Dict[str, Any]:
+    """
+    Get comprehensive summary of dual state system for debugging.
+    
+    Args:
+        account_id: Account identifier
+        
+    Returns:
+        Dict with dual state summary
+    """
+    return {
+        'account_id': account_id,
+        'has_pending_changes': detect_pending_changes(account_id),
+        'pending_period': {
+            'start': st.session_state.get(f"pending_start_{account_id}"),
+            'end': st.session_state.get(f"pending_end_{account_id}")
+        },
+        'applied_period': {
+            'start': st.session_state.get(f"applied_start_{account_id}"),
+            'end': st.session_state.get(f"applied_end_{account_id}")
+        },
+        'pending_setup_count': len([k for k in st.session_state.keys() 
+                                   if k.startswith(f"pending_setup_{account_id}_") and st.session_state[k]]),
+        'applied_setup_count': len([k for k in st.session_state.keys() 
+                                   if k.startswith(f"applied_setup_{account_id}_") and st.session_state[k]]),
+        'system_ready': True
+    }

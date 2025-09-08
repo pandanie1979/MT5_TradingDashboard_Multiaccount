@@ -1,4 +1,4 @@
-﻿# MT5 Trading Dashboard - Performance Summary Tab Component
+# MT5 Trading Dashboard - Performance Summary Tab Component
 # File: tabs/performance/tabs/summary_tab.py
 # Generated: September 2025
 # Refactoring: v1.4 -> v1.5

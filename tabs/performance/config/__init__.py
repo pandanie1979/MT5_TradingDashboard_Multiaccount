@@ -1,4 +1,4 @@
-﻿# Configuration module for performance tab
+# Configuration module for performance tab
 # File: tabs/performance/config/__init__.py
 
 """

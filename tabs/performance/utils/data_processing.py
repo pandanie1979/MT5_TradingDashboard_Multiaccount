@@ -1,4 +1,4 @@
-﻿# MT5 Trading Dashboard - Data Processing Utilities
+# MT5 Trading Dashboard - Data Processing Utilities
 # File: tabs/performance/utils/data_processing.py
 # Generated: September 2025
 # Refactoring: v1.4 -> v1.5
@@ -489,7 +489,7 @@ def render_timestamp_corrections_debug(timeline_df: pd.DataFrame):
         display_df = corrections_df[['ticket', 'original_open', 'original_close', 'corrected_close', 'time_diff_original', 'exit_reason']]
         display_df.columns = ['Ticket', 'OpenDatetime', 'CloseDatetime (Originale)', 'CloseDatetime (Corretta)', 'Diff Originale (sec)', 'ExitReason']
         
-        st.dataframe(display_df, use_container_width=True)
+        st.dataframe(display_df, width='stretch')
         
         # Statistiche
         col1, col2, col3 = st.columns(3)

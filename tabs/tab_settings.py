@@ -9,13 +9,13 @@ from config import (
 from datetime import datetime
 
 def render(accounts_data: dict):
-    st.header("⚙️ Impostazioni & Configurazione")
+    st.header("âš™ï¸ Impostazioni & Configurazione")
     
     # Tabs per organizzare le impostazioni
     settings_tab1, settings_tab2, settings_tab3 = st.tabs([
-        "🏦 Gestione Account", 
-        "📁 Percorsi MT5", 
-        "🔧 Debug & Info"
+        "ðŸ¦ Gestione Account", 
+        "ðŸ“ Percorsi MT5", 
+        "ðŸ”§ Debug & Info"
     ])
     
     with settings_tab1:
@@ -29,10 +29,10 @@ def render(accounts_data: dict):
 
 def render_account_management(accounts_data: dict):
     """Sezione gestione account"""
-    st.subheader("🏦 Account Configurati")
+    st.subheader("ðŸ¦ Account Configurati")
     
     if not accounts_data:
-        st.warning("❌ Nessun account trovato. Configura i percorsi MT5 nella tab 'Percorsi MT5'.")
+        st.warning("âŒ Nessun account trovato. Configura i percorsi MT5 nella tab 'Percorsi MT5'.")
         return
     
     # Tabella account con status
@@ -44,7 +44,7 @@ def render_account_management(accounts_data: dict):
         
         account_status_data.append({
             'Account ID': account_id,
-            'Status': '🟢 Attivo' if is_valid else '🔴 Errore',
+            'Status': 'ðŸŸ¢ Attivo' if is_valid else 'ðŸ”´ Errore',
             'Path': info['path'],
             'EA Files': info.get('ea_files', 0),
             'Trade Files': info.get('trade_files', 0),
@@ -59,13 +59,13 @@ def render_account_management(accounts_data: dict):
         # Mostra tabella con styling
         st.dataframe(
             df_accounts[['Account ID', 'Status', 'EA Files', 'Trade Files', 'Dettagli']],
-            use_container_width=True,
+            width='stretch',
             hide_index=True
         )
         
         # Dettagli account selezionato
         st.markdown("---")
-        st.subheader("📊 Dettagli Account Selezionato")
+        st.subheader("ðŸ“Š Dettagli Account Selezionato")
         
         selected_account = st.selectbox(
             "Seleziona account per dettagli:",
@@ -92,7 +92,7 @@ def render_account_management(accounts_data: dict):
             
             with col2:
                 # Test connessione in tempo reale
-                if st.button(f"🔍 Test Connessione Account {selected_account}", use_container_width=True):
+                if st.button(f"ðŸ” Test Connessione Account {selected_account}", width='stretch'):
                     with st.spinner("Verificando connessione..."):
                         from data.loader import check_mt5_connection
                         success, result = check_mt5_connection(selected_account, account_info['path'])
@@ -101,15 +101,15 @@ def render_account_management(accounts_data: dict):
                             st.success(f"✅ Connessione OK per Account {selected_account}")
                             st.json(result)
                         else:
-                            st.error(f"❌ Errore connessione: {result}")
+                            st.error(f"âŒ Errore connessione: {result}")
                 
                 # Mostra file recenti
-                if st.button(f"📂 Mostra File Account {selected_account}", use_container_width=True):
+                if st.button(f"ðŸ“‚ Mostra File Account {selected_account}", width='stretch'):
                     show_account_files(selected_account, account_info['path'])
 
 def render_path_management():
     """Sezione gestione percorsi MT5"""
-    st.subheader("📁 Gestione Percorsi MT5")
+    st.subheader("ðŸ“ Gestione Percorsi MT5")
     
     # Carica configurazione corrente
     current_paths = load_accounts_config()
@@ -122,17 +122,17 @@ def render_path_management():
         
         with col1:
             is_valid, message = verify_mt5_path(path)
-            status_icon = "✅" if is_valid else "❌"
+            status_icon = "✅" if is_valid else "âŒ"
             st.write(f"{status_icon} `{path}`")
             if not is_valid:
-                st.caption(f"⚠️ {message}")
+                st.caption(f"âš ï¸ {message}")
         
         with col2:
-            if st.button("🔍 Scansiona", key=f"scan_{i}"):
+            if st.button("ðŸ” Scansiona", key=f"scan_{i}"):
                 scan_path_for_accounts(path)
         
         with col3:
-            if st.button("🗑️ Rimuovi", key=f"remove_{i}"):
+            if st.button("ðŸ—‘ï¸ Rimuovi", key=f"remove_{i}"):
                 new_paths = [p for j, p in enumerate(current_paths) if j != i]
                 if save_accounts_config(new_paths):
                     st.success("Percorso rimosso! Ricarica la pagina per vedere le modifiche.")
@@ -141,7 +141,7 @@ def render_path_management():
                     st.error("Errore nel salvare la configurazione")
     
     st.markdown("---")
-    st.subheader("➕ Aggiungi Nuovo Percorso MT5")
+    st.subheader("âž• Aggiungi Nuovo Percorso MT5")
     
     # Form per aggiungere nuovo percorso
     with st.form("add_path_form"):
@@ -154,9 +154,9 @@ def render_path_management():
         
         col1, col2 = st.columns(2)
         with col1:
-            submitted = st.form_submit_button("➕ Aggiungi Percorso", use_container_width=True)
+            submitted = st.form_submit_button("âž• Aggiungi Percorso", width='stretch')
         with col2:
-            if st.form_submit_button("🔄 Reset a Default", use_container_width=True):
+            if st.form_submit_button("ðŸ”„ Reset a Default", width='stretch'):
                 if save_accounts_config(DEFAULT_MT5_PATHS):
                     st.success("Configurazione resettata ai valori di default! Ricarica la pagina per vedere le modifiche.")
                     # ✅ RIMOSSO st.rerun() per preservare tab
@@ -166,22 +166,22 @@ def render_path_management():
             is_valid, message = verify_mt5_path(new_path)
             
             if is_valid:
-                # Aggiungi se non esiste già
+                # Aggiungi se non esiste giÃ 
                 if new_path not in current_paths:
                     updated_paths = current_paths + [new_path]
                     if save_accounts_config(updated_paths):
                         st.success(f"✅ Percorso aggiunto: {new_path}. Ricarica la pagina per vedere le modifiche.")
                         # ✅ RIMOSSO st.rerun() per preservare tab
                     else:
-                        st.error("❌ Errore nel salvare la configurazione")
+                        st.error("âŒ Errore nel salvare la configurazione")
                 else:
-                    st.warning("⚠️ Percorso già presente nella configurazione")
+                    st.warning("âš ï¸ Percorso giÃ  presente nella configurazione")
             else:
-                st.error(f"❌ Percorso non valido: {message}")
+                st.error(f"âŒ Percorso non valido: {message}")
     
     # Percorsi suggeriti
     st.markdown("---")
-    st.subheader("💡 Percorsi Suggeriti")
+    st.subheader("ðŸ’¡ Percorsi Suggeriti")
     
     suggested_base = r"C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal"
     
@@ -198,13 +198,13 @@ def render_path_management():
                 
                 with col1:
                     is_valid, _ = verify_mt5_path(terminal_path)
-                    status = "✅" if is_valid else "❌"
+                    status = "✅" if is_valid else "âŒ"
                     st.write(f"{status} Terminal: `{terminal}`")
                     st.caption(f"Path: `{terminal_path}`")
                 
                 with col2:
                     if terminal_path not in current_paths and is_valid:
-                        if st.button("➕ Aggiungi", key=f"suggest_{terminal}"):
+                        if st.button("âž• Aggiungi", key=f"suggest_{terminal}"):
                             updated_paths = current_paths + [terminal_path]
                             if save_accounts_config(updated_paths):
                                 st.success("Percorso aggiunto! Ricarica la pagina per vedere le modifiche.")
@@ -217,17 +217,17 @@ def render_path_management():
 
 def render_debug_info(accounts_data: dict):
     """Sezione debug e informazioni sistema"""
-    st.subheader("🔧 Informazioni Debug")
+    st.subheader("ðŸ”§ Informazioni Debug")
     
     # Info configurazione
-    st.write("**📋 Configurazione Sistema:**")
+    st.write("**ðŸ“‹ Configurazione Sistema:**")
     
     col1, col2 = st.columns(2)
     
     with col1:
         # Info file configurazione
         config_exists = os.path.exists(ACCOUNTS_CONFIG_FILE)
-        st.metric("File Configurazione", "✅ Presente" if config_exists else "❌ Mancante")
+        st.metric("File Configurazione", "✅ Presente" if config_exists else "âŒ Mancante")
         
         if config_exists:
             try:
@@ -242,23 +242,23 @@ def render_debug_info(accounts_data: dict):
     
     with col2:
         # Info cache e performance
-        st.write("**⚡ Performance:**")
+        st.write("**âš¡ Performance:**")
         
-        # Verifica disponibilità cache
+        # Verifica disponibilitÃ  cache
         cache_available = hasattr(st.cache_data, 'clear')
-        st.write(f"Cache Streamlit: {'✅ Disponibile' if cache_available else '❌ Non disponibile'}")
+        st.write(f"Cache Streamlit: {'✅ Disponibile' if cache_available else 'âŒ Non disponibile'}")
         
-        if st.button("🧹 Pulisci Cache", use_container_width=True):
+        if st.button("ðŸ§¹ Pulisci Cache", width='stretch'):
             st.cache_data.clear()
             st.success("Cache pulita!")
     
     # Dettagli tecnici per ogni account
     if accounts_data:
         st.markdown("---")
-        st.subheader("🔍 Dettagli Tecnici Account")
+        st.subheader("ðŸ” Dettagli Tecnici Account")
         
         for account_id, info in accounts_data.items():
-            with st.expander(f"🏦 Account {account_id} - Debug Info"):
+            with st.expander(f"ðŸ¦ Account {account_id} - Debug Info"):
                 col1, col2 = st.columns(2)
                 
                 with col1:
@@ -275,7 +275,7 @@ def render_debug_info(accounts_data: dict):
                 with col2:
                     st.write("**Test Connessione:**")
                     
-                    if st.button(f"🔄 Test {account_id}", key=f"debug_test_{account_id}"):
+                    if st.button(f"ðŸ”„ Test {account_id}", key=f"debug_test_{account_id}"):
                         with st.spinner(f"Testing Account {account_id}..."):
                             from data.loader import check_mt5_connection
                             success, result = check_mt5_connection(account_id, info['path'])
@@ -284,15 +284,15 @@ def render_debug_info(accounts_data: dict):
                                 st.success("✅ Connessione OK")
                                 st.json(result)
                             else:
-                                st.error(f"❌ Errore: {result}")
+                                st.error(f"âŒ Errore: {result}")
                     
                     # Mostra file sample
-                    if st.button(f"📂 File Sample {account_id}", key=f"debug_files_{account_id}"):
+                    if st.button(f"ðŸ“‚ File Sample {account_id}", key=f"debug_files_{account_id}"):
                         show_sample_files(account_id, info['path'])
     
     # Log sistema
     st.markdown("---")
-    st.subheader("📋 Log Sistema")
+    st.subheader("ðŸ“‹ Log Sistema")
     
     col1, col2 = st.columns(2)
     
@@ -316,12 +316,12 @@ def render_debug_info(accounts_data: dict):
     
     # Tools di manutenzione
     st.markdown("---")
-    st.subheader("🛠️ Tools di Manutenzione")
+    st.subheader("ðŸ› ï¸ Tools di Manutenzione")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("🔄 Riscansiona Account", use_container_width=True):
+        if st.button("ðŸ”„ Riscansiona Account", width='stretch'):
             with st.spinner("Riscansionando account..."):
                 mt5_paths = load_accounts_config()
                 new_accounts = discover_accounts_from_paths(mt5_paths)
@@ -329,36 +329,36 @@ def render_debug_info(accounts_data: dict):
                 # ✅ RIMOSSO st.rerun() per preservare tab
     
     with col2:
-        if st.button("📊 Export Configurazione", use_container_width=True):
+        if st.button("ðŸ“Š Export Configurazione", width='stretch'):
             export_config = {
                 "mt5_paths": load_accounts_config(),
                 "accounts_data": accounts_data,
                 "timestamp": datetime.now().isoformat()
             }
             st.download_button(
-                label="💾 Download Config JSON",
+                label="ðŸ’¾ Download Config JSON",
                 data=str(export_config),
                 file_name="mt5_dashboard_config.json",
                 mime="application/json"
             )
     
     with col3:
-        if st.button("⚠️ Reset Completo", use_container_width=True):
-            if st.button("⚠️ CONFERMA RESET", key="confirm_reset", type="primary"):
+        if st.button("âš ï¸ Reset Completo", width='stretch'):
+            if st.button("âš ï¸ CONFERMA RESET", key="confirm_reset", type="primary"):
                 # Reset configurazione
                 if save_accounts_config(DEFAULT_MT5_PATHS):
                     st.cache_data.clear()
                     st.success("✅ Reset completato! Ricarica la pagina manualmente per vedere le modifiche.")
                     # ✅ RIMOSSO st.rerun() - ultimo caso risolto
                 else:
-                    st.error("❌ Errore durante il reset")
+                    st.error("âŒ Errore durante il reset")
 
 def scan_path_for_accounts(path: str):
     """Scansiona un percorso per trovare account"""
     st.write(f"**Scansione percorso:** `{path}`")
     
     if not os.path.exists(path):
-        st.error("❌ Percorso non trovato")
+        st.error("âŒ Percorso non trovato")
         return
     
     accounts = get_available_accounts_from_path(path)
@@ -374,7 +374,7 @@ def scan_path_for_accounts(path: str):
             
             st.write(f"- **Account {account}**: {len(ea_files)} EA files, {len(trade_files)} trade files")
     else:
-        st.warning("⚠️ Nessun account trovato in questo percorso")
+        st.warning("âš ï¸ Nessun account trovato in questo percorso")
 
 def show_account_files(account_id: str, path: str):
     """Mostra i file di un account specifico"""
@@ -382,7 +382,7 @@ def show_account_files(account_id: str, path: str):
     
     # File EA
     ea_files = glob.glob(os.path.join(path, f"EAMon_{account_id}_*.csv"))
-    st.write(f"**📊 EA Monitor Files ({len(ea_files)}):**")
+    st.write(f"**ðŸ“Š EA Monitor Files ({len(ea_files)}):**")
     
     if ea_files:
         for f in ea_files[:5]:  # Mostra solo i primi 5
@@ -400,7 +400,7 @@ def show_account_files(account_id: str, path: str):
     # File Trade
     trade_files = [f for f in glob.glob(os.path.join(path, f"{account_id}_*.csv")) 
                    if not os.path.basename(f).startswith('EAMon_')]
-    st.write(f"**📈 Trade Files ({len(trade_files)}):**")
+    st.write(f"**ðŸ“ˆ Trade Files ({len(trade_files)}):**")
     
     if trade_files:
         for f in sorted(trade_files, key=os.path.getmtime, reverse=True)[:5]:

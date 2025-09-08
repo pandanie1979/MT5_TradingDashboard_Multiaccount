@@ -1,4 +1,4 @@
-﻿# MT5 Trading Dashboard - Chart Helpers
+# MT5 Trading Dashboard - Chart Helpers
 # File: tabs/performance/utils/chart_helpers.py
 # Generated: September 2025
 # Refactoring: v1.4 -> v1.5

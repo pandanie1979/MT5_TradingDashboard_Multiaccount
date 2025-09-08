@@ -157,29 +157,56 @@ div[data-testid="column"]:first-child::-webkit-scrollbar-thumb {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(31, 119, 180, 0.3);
 }
-
 /* ==========================================================================
-   SIDEBAR COMPONENT STYLING
+   SIDEBAR SCROLLABILE - FIX PER STREAMLIT 1.49+
    ========================================================================== */
 
-/* Account info header in sidebar */
-.account-info-header {
-    background: linear-gradient(135deg, rgba(31, 119, 180, 0.15) 0%, rgba(31, 119, 180, 0.05) 100%);
-    border: 1px solid rgba(31, 119, 180, 0.25);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 15px;
+/* Sidebar principale - scrollabile */
+.stColumn:first-child {
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
-/* Expander styling in sidebar */
-.stExpander {
-    margin-bottom: 10px !important;
+/* Rimuovi spazio dal primo elemento della sidebar */
+.stColumn:first-child > div {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
-.stExpander > div > div > div {
-    background: white !important;
-    border-radius: 6px !important;
-    border: 1px solid #e0e0e0 !important;
+/* Rimuovi spazio da tutti i contenitori nella sidebar */
+.stColumn:first-child .stMarkdown:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.stColumn:first-child .element-container:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Scrollbar styling */
+.stColumn:first-child::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.stColumn:first-child::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+}
+
+.stColumn:first-child::-webkit-scrollbar-thumb {
+    background: #c1c1c1 !important;
+    border-radius: 3px !important;
+}
+
+/* GPU acceleration per scrolling fluido */
+.stColumn:first-child {
+    transform: translateZ(0);
+    will-change: scroll-position;
 }
 
 /* ==========================================================================

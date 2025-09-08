@@ -11,7 +11,7 @@ def render(account_id: str, account_path: str, account_info: dict):
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
         <div style="width: 4px; height: 40px; background: {account_color}; margin-right: 15px; border-radius: 2px;"></div>
         <div>
-            <h2 style="margin: 0; color: #1f1f1f;">💰 Posizioni Aperte</h2>
+            <h2 style="margin: 0; color: #1f1f1f;">ðŸ’° Posizioni Aperte</h2>
             <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Account: {account_id} | 
             Monitoraggio posizioni real-time</p>
         </div>
@@ -21,17 +21,17 @@ def render(account_id: str, account_path: str, account_info: dict):
     ea_df = get_ea_data(account_id, account_path)
 
     if ea_df is None or ea_df.empty:
-        st.error(f"❌ Impossibile caricare i dati degli EA per Account {account_id}")
-        st.info(f"📁 Percorso: {account_path}")
+        st.error(f"âŒ Impossibile caricare i dati degli EA per Account {account_id}")
+        st.info(f"ðŸ“ Percorso: {account_path}")
         return
 
     ea_with_positions = ea_df[ea_df['Has_Position'] == 'YES'].copy()
 
     if ea_with_positions.empty:
-        st.info(f"🎉 Account {account_id}: Non ci sono posizioni aperte al momento")
+        st.info(f"ðŸŽ‰ Account {account_id}: Non ci sono posizioni aperte al momento")
         
         # Mostra comunque statistiche generali
-        st.markdown("### 📊 Statistiche Account")
+        st.markdown("### ðŸ“Š Statistiche Account")
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("EA Totali", len(ea_df))
@@ -44,7 +44,7 @@ def render(account_id: str, account_path: str, account_info: dict):
         
         return
 
-    st.success(f"📍 Account {account_id}: Trovate {len(ea_with_positions)} posizioni aperte")
+    st.success(f"ðŸ“ Account {account_id}: Trovate {len(ea_with_positions)} posizioni aperte")
 
     # Metriche con stile account
     col1, col2, col3, col4 = st.columns(4)
@@ -52,16 +52,16 @@ def render(account_id: str, account_path: str, account_info: dict):
         st.metric("Posizioni Aperte", len(ea_with_positions))
     with col2:
         total_margin = ea_with_positions['Position_Margin'].sum()
-        st.metric("Margine Totale", f"{total_margin:.2f} €")
+        st.metric("Margine Totale", f"{total_margin:.2f} â‚¬")
     with col3:
         unique_symbols = ea_with_positions['Symbol'].nunique()
         st.metric("Symbols Coinvolti", unique_symbols)
     with col4:
         avg_margin = ea_with_positions['Position_Margin'].mean()
-        st.metric("Margine Medio", f"{avg_margin:.2f} €")
+        st.metric("Margine Medio", f"{avg_margin:.2f} â‚¬")
 
     st.markdown("---")
-    st.subheader(f"📋 Dettaglio Posizioni Aperte - Account {account_id}")
+    st.subheader(f"ðŸ“‹ Dettaglio Posizioni Aperte - Account {account_id}")
 
     now = datetime.now()
     ea_with_positions['Minutes_Since_Last_Tick'] = (
@@ -74,7 +74,7 @@ def render(account_id: str, account_path: str, account_info: dict):
         'Symbol': 'Symbol',
         'Magic_Number': 'Magic',
         'Status': 'Status',
-        'Position_Margin': 'Margine (€)',
+        'Position_Margin': 'Margine (â‚¬)',
         'Tick_Count': 'Tick Ricevuti',
         'Minutes_Since_Last_Tick': 'Min da Ultimo Tick',
         'Last_Tick_Time': 'Ultimo Tick'
@@ -103,27 +103,27 @@ def render(account_id: str, account_path: str, account_info: dict):
             return 'background-color: #fff3cd; color: #856404'
 
     # Applica styling
-    styled_df = table_df.style.map(color_margin, subset=['Margine (€)']) \
+    styled_df = table_df.style.map(color_margin, subset=['Margine (â‚¬)']) \
                               .map(color_status, subset=['Status'])
 
     st.dataframe(
         styled_df, 
-        use_container_width=True,
+        width="stretch",
         column_config={
-            "Margine (€)": st.column_config.NumberColumn(
-                "Margine (€)",
-                format="%.2f €"
+            "Margine (â‚¬)": st.column_config.NumberColumn(
+                "Margine (â‚¬)",
+                format="%.2f â‚¬"
             )
         }
     )
 
     st.markdown("---")
-    st.subheader(f"⚠️ Monitoraggio Posizioni Account {account_id}")
+    st.subheader(f"âš ï¸ Monitoraggio Posizioni Account {account_id}")
 
     # Alert per tick non ricevuti (più di 5 minuti)
     old_ticks = ea_with_positions[ea_with_positions['Minutes_Since_Last_Tick'] > 5]
     if not old_ticks.empty:
-        st.warning(f"🚨 {len(old_ticks)} posizioni non ricevono tick da più di 5 minuti:")
+        st.warning(f"ðŸš¨ {len(old_ticks)} posizioni non ricevono tick da più di 5 minuti:")
         for _, pos in old_ticks.iterrows():
             st.write(f"- **{pos['Setup_Name']}** ({pos['Symbol']}): {pos['Minutes_Since_Last_Tick']:.1f} minuti fa")
     else:
@@ -132,32 +132,32 @@ def render(account_id: str, account_path: str, account_info: dict):
     # Alert per EA inattivi con posizioni
     inactive_with_positions = ea_with_positions[ea_with_positions['Status'] != 'ACTIVE']
     if not inactive_with_positions.empty:
-        st.error(f"🚨 {len(inactive_with_positions)} EA con posizioni aperte ma NON attivi:")
+        st.error(f"ðŸš¨ {len(inactive_with_positions)} EA con posizioni aperte ma NON attivi:")
         for _, ea in inactive_with_positions.iterrows():
-            st.write(f"- **{ea['Setup_Name']}** ({ea['Symbol']}): Status = {ea['Status']}, Margine = €{ea['Position_Margin']:.2f}")
+            st.write(f"- **{ea['Setup_Name']}** ({ea['Symbol']}): Status = {ea['Status']}, Margine = â‚¬{ea['Position_Margin']:.2f}")
 
     # Alert per margini elevati
     high_margin_positions = ea_with_positions[ea_with_positions['Position_Margin'] > 1000]
     if not high_margin_positions.empty:
-        st.warning(f"💰 {len(high_margin_positions)} posizioni con margine elevato (>€1000):")
+        st.warning(f"ðŸ’° {len(high_margin_positions)} posizioni con margine elevato (>â‚¬1000):")
         for _, pos in high_margin_positions.iterrows():
-            st.write(f"- **{pos['Setup_Name']}** ({pos['Symbol']}): €{pos['Position_Margin']:.2f}")
+            st.write(f"- **{pos['Setup_Name']}** ({pos['Symbol']}): â‚¬{pos['Position_Margin']:.2f}")
 
     # Distribuzione per Symbol
     st.markdown("---")
-    st.subheader(f"📊 Distribuzione Posizioni per Symbol - Account {account_id}")
+    st.subheader(f"ðŸ“Š Distribuzione Posizioni per Symbol - Account {account_id}")
     
     symbol_summary = ea_with_positions.groupby('Symbol').agg({
         'Position_Margin': ['sum', 'count', 'mean']
     }).round(2)
     
-    symbol_summary.columns = ['Margine Totale (€)', 'Num. Posizioni', 'Margine Medio (€)']
-    symbol_summary = symbol_summary.sort_values('Margine Totale (€)', ascending=False)
+    symbol_summary.columns = ['Margine Totale (â‚¬)', 'Num. Posizioni', 'Margine Medio (â‚¬)']
+    symbol_summary = symbol_summary.sort_values('Margine Totale (â‚¬)', ascending=False)
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.dataframe(symbol_summary, use_container_width=True)
+        st.dataframe(symbol_summary, width="stretch")
     
     with col2:
         # Grafico a torta delle posizioni per symbol
@@ -172,11 +172,11 @@ def render(account_id: str, account_path: str, account_info: dict):
                 color_discrete_sequence=[account_color] + px.colors.qualitative.Set3
             )
             fig.update_layout(height=300, showlegend=True)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
     # Timeline delle aperture posizioni
     st.markdown("---")
-    st.subheader(f"⏰ Timeline Aperture Posizioni - Account {account_id}")
+    st.subheader(f"â° Timeline Aperture Posizioni - Account {account_id}")
     
     if 'EA_Start_Time' in ea_with_positions.columns:
         ea_starts = ea_with_positions[['Setup_Name', 'Symbol', 'EA_Start_Time', 'Position_Margin']].copy()
@@ -197,7 +197,7 @@ def render(account_id: str, account_path: str, account_info: dict):
                     days_ago = hours_ago / 24
                     time_str = f"{days_ago:.1f} giorni fa"
                 
-                st.write(f"- **{row['Setup_Name']}** ({row['Symbol']}): €{row['Position_Margin']:.2f} - {time_str}")
+                st.write(f"- **{row['Setup_Name']}** ({row['Symbol']}): â‚¬{row['Position_Margin']:.2f} - {time_str}")
         else:
             st.info("Nessuna informazione di timing disponibile per le posizioni")
 
@@ -206,7 +206,7 @@ def render(account_id: str, account_path: str, account_info: dict):
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button(f"🔄 Aggiorna Posizioni Account {account_id}", use_container_width=True):
+        if st.button(f"ðŸ”„ Aggiorna Posizioni Account {account_id}", width="stretch"):
             st.cache_data.clear()
             # NON usare st.rerun() per preservare stato tab
             st.success("✅ Cache pulita! I dati posizioni saranno aggiornati automaticamente.")
@@ -221,10 +221,10 @@ def render(account_id: str, account_path: str, account_info: dict):
     <div style="background: linear-gradient(90deg, {account_color}22 0%, {account_color}11 100%); 
                 padding: 12px 16px; border-radius: 8px; border-left: 4px solid {account_color}; 
                 margin: 10px 0;">
-        <strong>📊 Riepilogo Account {account_id}:</strong><br>
-        • {len(ea_with_positions)} posizioni aperte per un margine totale di €{total_margin:.2f}<br>
-        • {len(ea_with_positions[ea_with_positions['Status'] == 'ACTIVE'])} EA attivi con posizioni<br>
-        • Symbols coinvolti: {', '.join(ea_with_positions['Symbol'].unique())}<br>
-        • Status monitoraggio: {"🟢 OK" if len(old_ticks) == 0 and len(inactive_with_positions) == 0 else "🟡 Attenzione"}
+        <strong>ðŸ“Š Riepilogo Account {account_id}:</strong><br>
+        "¢ {len(ea_with_positions)} posizioni aperte per un margine totale di â‚¬{total_margin:.2f}<br>
+        "¢ {len(ea_with_positions[ea_with_positions['Status'] == 'ACTIVE'])} EA attivi con posizioni<br>
+        "¢ Symbols coinvolti: {', '.join(ea_with_positions['Symbol'].unique())}<br>
+        "¢ Status monitoraggio: {"ðŸŸ¢ OK" if len(old_ticks) == 0 and len(inactive_with_positions) == 0 else "ðŸŸ¡ Attenzione"}
     </div>
     """, unsafe_allow_html=True)

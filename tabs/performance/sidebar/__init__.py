@@ -1,4 +1,4 @@
-﻿# Sidebar components module for performance tab
+# Sidebar components module for performance tab
 # File: tabs/performance/sidebar/__init__.py
 
 """

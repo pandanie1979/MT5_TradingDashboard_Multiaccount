@@ -1,4 +1,4 @@
-﻿# Tab components module for performance tab main area
+# Tab components module for performance tab main area
 # File: tabs/performance/tabs/__init__.py
 
 """

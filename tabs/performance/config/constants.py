@@ -1,4 +1,4 @@
-﻿# MT5 Trading Dashboard - Performance Tab Constants
+# MT5 Trading Dashboard - Performance Tab Constants
 # File: tabs/performance/config/constants.py
 # Generated: September 2025
 # Refactoring: v1.4 -> v1.5

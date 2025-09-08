@@ -1,4 +1,4 @@
-﻿# MT5 Trading Dashboard - Sidebar Account Info
+# MT5 Trading Dashboard - Sidebar Account Info
 # File: tabs/performance/sidebar/account_info.py
 # Generated: September 2025
 # Refactoring: v1.4 -> v1.5

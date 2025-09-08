@@ -1,4 +1,4 @@
-﻿# MT5 Trading Dashboard - Performance Module Initialization
+# MT5 Trading Dashboard - Performance Module Initialization
 # File: tabs/performance/__init__.py
 # Generated: September 2025
 # Refactoring: v1.4 -> v1.5
