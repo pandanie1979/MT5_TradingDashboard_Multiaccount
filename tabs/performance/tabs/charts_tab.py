@@ -1,4 +1,4 @@
-# MT5 Trading Dashboard - Charts Tab Component
+﻿# MT5 Trading Dashboard - Charts Tab Component
 # File: tabs/performance/tabs/charts_tab.py
 # Generated: September 2025
 # Refactoring: v1.4 -> v1.5
@@ -40,7 +40,7 @@ def render_charts_tab(period_trades: pd.DataFrame, account_id: str,
         account_color: Account color for styling
         selected_setups: List of selected magic numbers
     """
-    st.markdown(f"### ?? Analisi Grafici - Account {account_id}")
+    st.markdown(f"### 📈 Analisi Grafici - Account {account_id}")
     
     if period_trades.empty:
         st.info(get_error_message("no_data"))
@@ -128,7 +128,7 @@ def _render_multi_panel_chart(equity_data: pd.DataFrame, margin_timeline: pd.Dat
         )
         
         # Display chart
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, width='stretch')
         
     except Exception as e:
         st.error(f"Errore nella creazione del grafico: {str(e)}")
@@ -160,14 +160,14 @@ def _render_classification_info(equity_data: pd.DataFrame, multi_mn: bool):
     # Display info based on setup type
     if multi_mn:
         st.info(
-            f"?? **Analisi Multi-Setup con Overlay Colori**: "
+            f"🎨 **Analisi Multi-Setup con Overlay Colori**: "
             f"{backtest_count} deals backtest (tickets: {bt_range}) + "
             f"{live_count} deals live (tickets: {live_range}). "
             f"Sfondo colorato per composizione settimanale (grigio = backtest, blu = live, gradiente = mix)"
         )
     else:
         st.info(
-            f"?? **Analisi Singolo Setup con Overlay**: "
+            f"🔍 **Analisi Singolo Setup con Overlay**: "
             f"{backtest_count} deals backtest (tickets: {bt_range}) + "
             f"{live_count} deals live (tickets: {live_range}). "
             f"Sfondo grigio = backtest, sfondo blu = live"
@@ -181,7 +181,7 @@ def _render_period_analysis(equity_data: pd.DataFrame):
     Args:
         equity_data: Equity data with trade_type and period info
     """
-    with st.expander("?? Analisi Dettagliata Periodo", expanded=False):
+    with st.expander("📊 Analisi Dettagliata Periodo", expanded=False):
         if 'trade_type' in equity_data.columns:
             # Generate enhanced period information
             period_info = generate_period_info_enhanced(equity_data, 'PlotDate')
@@ -197,7 +197,7 @@ def render_chart_controls(account_id: str):
     Args:
         account_id: Account identifier
     """
-    st.markdown("### ?? Opzioni Grafico")
+    st.markdown("### ⚙️ Opzioni Grafico")
     
     col1, col2 = st.columns(2)
     

@@ -1,10 +1,10 @@
-﻿# MT5 Trading Dashboard - Period Selection Component (PENDING STATE)
+﻿# MT5 Trading Dashboard - Period Selection Component (BUG FIXED)
 # File: tabs/performance/sidebar/period_selection.py
-# Modified: September 2025 - Updated to use pending state keys
+# Fixed: September 2025 - Removed undefined function references
 
 """
 Period selection controls for sidebar.
-UPDATED: Uses pending state keys - changes are applied only when user clicks Update Metrics.
+FIXED: Removed _render_widgets_only reference and simplified implementation.
 """
 
 import streamlit as st
@@ -16,7 +16,7 @@ from typing import Dict, Any
 def render_period_selection_enhanced(trades_data, account_id):
     """
     Period selection interface using PENDING state.
-    Changes are saved to pending_* keys and applied only via Update Metrics button.
+    FIXED: Simplified implementation without undefined functions.
     
     Args:
         trades_data: DataFrame dei trade
@@ -114,6 +114,9 @@ def render_period_selection_enhanced(trades_data, account_id):
     # Show if different from applied state
     _render_pending_vs_applied_indicator(real_account_id)
     
+    # Add preset buttons
+    render_period_quick_presets(real_account_id, trades_data)
+    
     return {
         'start_date': current_start,
         'end_date': current_end,
@@ -136,6 +139,58 @@ def _render_pending_vs_applied_indicator(account_id: str):
             st.warning("⚠️ Modifiche non applicate - clicca 'Update Metrics'")
         else:
             st.info("🆕 Nuova configurazione - clicca 'Update Metrics' per applicare")
+
+
+def render_period_quick_presets(account_id: str, trades_df: pd.DataFrame):
+    """
+    Render quick preset buttons for common periods.
+    Updates pending state only.
+    
+    Args:
+        account_id: Account identifier
+        trades_df: Complete trades DataFrame
+    """
+    if trades_df.empty:
+        return
+    
+    st.markdown("**🚀 Preset Rapidi:**")
+    
+    data_start = trades_df['OpenDatetime'].min().date()
+    data_end = trades_df['OpenDatetime'].max().date()
+    today = min(datetime.now().date(), data_end)
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        if st.button("7D", key=f"preset_7d_{account_id}", use_container_width=True):
+            _apply_preset_to_pending(account_id, today, data_start, 7)
+    
+    with col2:
+        if st.button("30D", key=f"preset_30d_{account_id}", use_container_width=True):
+            _apply_preset_to_pending(account_id, today, data_start, 30)
+    
+    with col3:
+        if st.button("90D", key=f"preset_90d_{account_id}", use_container_width=True):
+            _apply_preset_to_pending(account_id, today, data_start, 90)
+    
+    with col4:
+        if st.button("YTD", key=f"preset_ytd_{account_id}", use_container_width=True):
+            year_start = datetime(today.year, 1, 1).date()
+            ytd_start = max(data_start, year_start)
+            _apply_preset_to_pending(account_id, today, ytd_start, None)
+
+
+def _apply_preset_to_pending(account_id: str, end_date: date, data_start: date, days: int):
+    """Apply preset to pending state only."""
+    if days is None:  # YTD case
+        preset_start = data_start
+    else:
+        preset_start = max(data_start, end_date - timedelta(days=days))
+    
+    st.session_state[f"pending_start_{account_id}"] = preset_start
+    st.session_state[f"pending_end_{account_id}"] = end_date
+    
+    st.success(f"✅ Preset applicato al pending state!")
 
 
 def get_period_info_for_display(account_id: str) -> Dict[str, Any]:
@@ -180,58 +235,6 @@ def reset_period_to_default(account_id: str, trades_df: pd.DataFrame) -> bool:
     st.session_state[f"pending_end_{account_id}"] = default_end
     
     return True
-
-
-def render_period_quick_presets(account_id: str, trades_df: pd.DataFrame):
-    """
-    Render quick preset buttons for common periods.
-    Updates pending state only.
-    
-    Args:
-        account_id: Account identifier
-        trades_df: Complete trades DataFrame
-    """
-    if trades_df.empty:
-        return
-    
-    st.markdown("**🚀 Preset Rapidi:**")
-    
-    data_start = trades_df['OpenDatetime'].min().date()
-    data_end = trades_df['OpenDatetime'].max().date()
-    today = min(datetime.now().date(), data_end)
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        if st.button("7D", key=f"preset_7d_{account_id}", width='stretch'):
-            _apply_preset_to_pending(account_id, today, data_start, 7)
-    
-    with col2:
-        if st.button("30D", key=f"preset_30d_{account_id}", width='stretch'):
-            _apply_preset_to_pending(account_id, today, data_start, 30)
-    
-    with col3:
-        if st.button("90D", key=f"preset_90d_{account_id}", width='stretch'):
-            _apply_preset_to_pending(account_id, today, data_start, 90)
-    
-    with col4:
-        if st.button("YTD", key=f"preset_ytd_{account_id}", width='stretch'):
-            year_start = datetime(today.year, 1, 1).date()
-            ytd_start = max(data_start, year_start)
-            _apply_preset_to_pending(account_id, today, ytd_start, None)
-
-
-def _apply_preset_to_pending(account_id: str, end_date: date, data_start: date, days: int):
-    """Apply preset to pending state only."""
-    if days is None:  # YTD case
-        preset_start = data_start
-    else:
-        preset_start = max(data_start, end_date - timedelta(days=days))
-    
-    st.session_state[f"pending_start_{account_id}"] = preset_start
-    st.session_state[f"pending_end_{account_id}"] = end_date
-    
-    st.success(f"✅ Preset applicato al pending state!")
 
 
 def get_pending_period_summary(account_id: str) -> str:
