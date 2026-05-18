@@ -1,28 +1,26 @@
-# Current Sprint: R2 — Cache and State Simplification
+# Current Sprint: R3 — UI Polish and Production Hardening
 
-**STATUS**: `DONE`
-**Branch**: `refactor/r2-state`
+**STATUS**: `READY`
+**Branch**: `refactor/r3-polish`
 
 ## Objective
-Simplify the application architecture by removing the redundant "pending/applied" state system and the manual update button, ensuring sidebar changes reflect immediately in charts.
+Finalize the application for production deployment. This involves removing all raw emoji from source code to prevent encoding issues on Windows, pinning dependencies for stability, and finalizing deployment documentation.
 
 ## Tasks (from ROADMAP.md)
 
-- [x] **TD-05**: Remove `st.session_state` DataFrame cache from `tabs/performance/main.py`. Rely solely on `@st.cache_data` from `data/loader.py`.
-- [x] **TD-06**: Delete the pending/applied dual-state system in `session_helpers.py`.
-- [x] **TD-06**: Remove the "Update Metrics" button and "Modifiche in Attesa" info boxes.
-- [x] **TD-06**: Update `get_current_period_trades()` to read sidebar state directly.
-- [x] **TD-11**: Gate `debug_tools.py` loading behind `DASHBOARD_DEBUG` env var in sidebar `layout.py`.
-- [x] **TD-10**: Final fix for encoding garbage in `tabs/tab_performance.py` docstrings (file was already clean ASCII).
+- [ ] **ADR-005 Compliance**: Global scan to replace raw emoji characters in all `.py` files with plain text or Unicode escapes.
+- [ ] **Documentation**: Update `README.md` with Windows Server 2025 installation, `accounts_config.json` setup, and `DASHBOARD_DEBUG` usage.
+- [ ] **Config Examples**: Update `accounts_config.example.json` with a template for the Contabo VPS path structure.
+- [ ] **Final Pass**: Search for any remaining `st.sidebar.checkbox` used for debug that is not gated by `DASHBOARD_DEBUG`.
+- [ ] **Pin Dependencies**: Update `requirements.txt` with exact versions (`streamlit==1.40.1`, `pandas==2.2.3`, `plotly==5.24.1`).
 
 ## Done When
 
-- [x] No `pending_` or `applied_` prefixed keys are used in `st.session_state`.
-- [x] UI updates immediately when changing dates or setups in the sidebar.
-- [x] `session_helpers.py` line count reduced significantly (771 → ~280 lines).
-- [x] `tab_performance.py` is free of encoding artifacts (was already clean).
+- [ ] `requirements.txt` contains pinned versions.
+- [ ] No raw emoji characters found in source code via regex search.
+- [ ] `README.md` contains clear deployment instructions for Windows.
+- [ ] `ROADMAP.md` shows R3 as COMPLETE.
 
 ## ADRs in Effect
-- **ADR-001**: No pending/applied state system.
-- **ADR-002**: Single cache layer (`@st.cache_data` only).
-- **ADR-006**: Immediate apply on sidebar changes.
+- **ADR-004**: No runtime debug UI — env var gate.
+- **ADR-005**: UTF-8 source files, no inline emoji in code.
