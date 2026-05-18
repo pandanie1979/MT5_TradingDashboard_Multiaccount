@@ -1,4 +1,4 @@
-﻿# MT5 Trading Dashboard - Sidebar Layout (SIMPLIFIED)
+# MT5 Trading Dashboard - Sidebar Layout (SIMPLIFIED)
 # File: tabs/performance/sidebar/layout.py
 # Modified: September 2025 - Removed advanced filters section
 
@@ -7,6 +7,8 @@ Sidebar layout management for performance tab.
 SIMPLIFIED: Removed advanced filters section as requested.
 """
 
+import os
+
 import streamlit as st
 import pandas as pd
 from typing import Dict, Any
@@ -14,10 +16,10 @@ from typing import Dict, Any
 from .account_info import render_account_info_header
 from .period_selection import render_period_selection_enhanced
 from .setup_selection import render_setup_selection_clean
-# REMOVED: from .filters import render_advanced_filters_panel
-from .debug_tools import render_debug_tools_panel
 from ..utils.session_helpers import get_sidebar_width, set_sidebar_width
 from ..config.constants import SIDEBAR_PRESETS, get_default_expanded
+
+_DEBUG = os.getenv("DASHBOARD_DEBUG", "false").lower() == "true"
 
 
 def render_scrollable_sidebar(trades_df: pd.DataFrame, account_id: str, 
@@ -56,9 +58,11 @@ def render_scrollable_sidebar(trades_df: pd.DataFrame, account_id: str,
     # with st.expander("🔍 Filtri Avanzati", expanded=get_default_expanded("advanced_filters")):
     #     render_advanced_filters_panel(trades_df, account_id)
     
-    # Debug Tools (kept for development/troubleshooting)
-    with st.expander("🔧 Debug & Tools", expanded=get_default_expanded("debug_tools")):
-        render_debug_tools_panel(trades_df, account_id, account_path)
+    # Debug Tools (only when DASHBOARD_DEBUG=true)
+    if _DEBUG:
+        from .debug_tools import render_debug_tools_panel
+        with st.expander("Debug & Tools", expanded=get_default_expanded("debug_tools")):
+            render_debug_tools_panel(trades_df, account_id, account_path)
 
 
 def render_sidebar_width_control(account_id: str):
