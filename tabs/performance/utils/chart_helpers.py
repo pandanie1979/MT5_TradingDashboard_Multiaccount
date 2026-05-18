@@ -100,7 +100,7 @@ def format_hover_info_detailed(row: pd.Series, multi_mn: bool = False) -> str:
     base_info += f"<b>Equity:</b> €{row.get('Cumulative_PL', 0):.2f}<br>"
     
     if 'trade_type' in row:
-        trade_type_display = "🔴 Backtest" if row['trade_type'] == 'backtest' else "🔵 Live"
+        trade_type_display = "Backtest" if row['trade_type'] == 'backtest' else "Live"
         base_info += f"<b>Tipo:</b> {trade_type_display}<br>"
     
     if multi_mn and 'MagicNumber' in row:
@@ -138,9 +138,9 @@ def create_multi_panel_chart(equity_data: pd.DataFrame,
         rows=3, cols=1,
         row_heights=CHART_CONFIG['subplot_heights'],
         subplot_titles=(
-            f'📈 Equity Curve - Account {account_id}', 
-            f'📉 Portfolio Drawdown - Account {account_id}', 
-            f'💰 Margine Impegnato - Account {account_id}'
+            f'Equity Curve - Account {account_id}',
+            f'Portfolio Drawdown - Account {account_id}',
+            f'Margine Impegnato - Account {account_id}'
         ),
         vertical_spacing=CHART_CONFIG['vertical_spacing'],
         shared_xaxes=True
@@ -290,7 +290,7 @@ def _configure_chart_layout(fig: go.Figure, account_id: str, multi_mn: bool,
         showlegend=False,
         hovermode='x unified',
         plot_bgcolor='white',
-        title_text=f"📊 Dashboard Performance - Account {account_id}{title_suffix}",
+        title_text=f"Dashboard Performance - Account {account_id}{title_suffix}",
         title_x=0.5,
         title_font_size=16,
         margin=CHART_CONFIG['margins']
@@ -359,28 +359,28 @@ def generate_period_info_enhanced(equity_data: pd.DataFrame,
         month_bt_pct = (month_bt / month_total * 100)
         
         if month_bt_pct == 100:
-            period_type = "🔘 Solo Backtest"
+            period_type = "Solo Backtest"
         elif month_bt_pct == 0:
-            period_type = "🔵 Solo Live"
+            period_type = "Solo Live"
         elif month_bt_pct > 70:
-            period_type = "🔘 Prevalenza Backtest"
+            period_type = "Prevalenza Backtest"
         elif month_bt_pct < 30:
-            period_type = "🔵 Prevalenza Live"
+            period_type = "Prevalenza Live"
         else:
-            period_type = "🟣 Mix Equilibrato"
+            period_type = "Mix Equilibrato"
         
         monthly_analysis.append(f"{month}: {period_type} ({month_bt}/{month_live})")
     
     # Componi messaggio informativo
     info_parts = [
-        f"📊 **Composizione Globale**: {bt_deals} deals backtest ({bt_percentage:.1f}%) + {live_deals} deals live ({live_percentage:.1f}%)",
-        f"📅 **Periodo Analizzato**: {total_days} giorni",
-        f"🎨 **Legenda Colori**: 🔘 Grigio = Backtest | 🔵 Blu = Live | 🟣 Viola = Mix"
+        f"**Composizione Globale**: {bt_deals} deals backtest ({bt_percentage:.1f}%) + {live_deals} deals live ({live_percentage:.1f}%)",
+        f"**Periodo Analizzato**: {total_days} giorni",
+        f"**Legenda Colori**: Grigio = Backtest | Blu = Live | Viola = Mix"
     ]
-    
+
     # Aggiunge analisi mensile se rilevante
     if len(monthly_analysis) <= 6:  # Solo se non troppo verboso
-        info_parts.append("📈 **Breakdown Mensile**:")
+        info_parts.append("**Breakdown Mensile**:")
         info_parts.extend([f"  {analysis}" for analysis in monthly_analysis])
     
     return "\n".join(info_parts)

@@ -54,21 +54,21 @@ def render_account_info_header(trades_df: pd.DataFrame, account_id: str,
         <div style="display: flex; align-items: center; margin-bottom: 8px;">
             <div style="width: 4px; height: 30px; background: {account_color}; margin-right: 10px; border-radius: 2px;"></div>
             <div>
-                <h4 style="margin: 0; color: {account_color};">📈 Account {account_id}</h4>
+                <h4 style="margin: 0; color: {account_color};">Account {account_id}</h4>
                 <small style="color: #666;">Analisi Performance</small>
             </div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px;">
-            <div><strong>📁 Files:</strong> {total_files}</div>
-            <div><strong>📊 Deals:</strong> {total_deals:,}</div>
-            <div><strong>🎯 Trades:</strong> {unique_trades:,}</div>
-            <div><strong>📈 Ratio:</strong> {total_deals/unique_trades:.1f}</div>
-            <div><strong>🔧 BT Files:</strong> {filenames_with_000000}</div>
-            <div><strong>⚡ Live Files:</strong> {filenames_without_000000}</div>
+            <div><strong>Files:</strong> {total_files}</div>
+            <div><strong>Deals:</strong> {total_deals:,}</div>
+            <div><strong>Trades:</strong> {unique_trades:,}</div>
+            <div><strong>Ratio:</strong> {total_deals/unique_trades:.1f}</div>
+            <div><strong>BT Files:</strong> {filenames_with_000000}</div>
+            <div><strong>Live Files:</strong> {filenames_without_000000}</div>
         </div>
         <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid {account_color}33;">
             <div style="font-size: 12px; font-weight: bold; color: {account_color};">
-                💰 P&L Totale: {format_number_compact(total_profit, '€')}
+                P&L Totale: {format_number_compact(total_profit, '€')}
             </div>
         </div>
     </div>
@@ -85,11 +85,11 @@ def render_account_status_indicator(account_info: Dict[str, Any]):
     status = account_info.get('status', 'unknown')
     
     if status == 'active':
-        st.success("✅ Account Attivo")
+        st.success("[OK] Account Attivo")
     elif status == 'error':
-        st.error("❌ Errore Connessione")
+        st.error("[ERR] Errore Connessione")
     else:
-        st.warning("⚠️ Status Sconosciuto")
+        st.warning("⚠ Status Sconosciuto")
 
 
 def render_account_quick_stats(trades_df: pd.DataFrame):
@@ -155,13 +155,13 @@ def render_account_file_analysis(trades_df: pd.DataFrame, account_id: str):
     live_files = [f for f in filenames if '_000000' not in f]
     
     # Show summary
-    st.markdown("**📁 Analisi File:**")
+    st.markdown("**Analisi File:**")
     st.write(f"- Totale file: {len(filenames)}")
     st.write(f"- File backtest (_000000): {len(backtest_files)}")
     st.write(f"- File live: {len(live_files)}")
     
     # Show examples if requested
-    with st.expander("📄 Esempi Filename"):
+    with st.expander("Esempi Filename"):
         if backtest_files:
             st.write("**Backtest:**")
             for f in backtest_files[:3]:

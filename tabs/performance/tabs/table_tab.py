@@ -25,7 +25,7 @@ def render_performance_table_tab(period_trades: pd.DataFrame, account_id: str):
         period_trades: Filtered trades for current period and setups
         account_id: Account identifier
     """
-    st.markdown(f"### 📋 Performance per Setup - Account {account_id}")
+    st.markdown(f"### Performance per Setup - Account {account_id}")
     
     if period_trades.empty:
         st.warning(get_error_message("no_data"))
@@ -179,7 +179,7 @@ def _render_setup_summary_statistics(performance_df: pd.DataFrame, account_id: s
         account_id: Account identifier
     """
     st.markdown("---")
-    st.markdown("#### 📊 Riepilogo Setup")
+    st.markdown("#### Riepilogo Setup")
     
     # Calculate summary metrics
     total_setups = len(performance_df)
@@ -214,7 +214,7 @@ def _render_setup_summary_statistics(performance_df: pd.DataFrame, account_id: s
     
     # Additional insights
     if best_setup is not None and worst_setup is not None:
-        st.markdown("**🎯 Performance Highlights:**")
+        st.markdown("**Performance Highlights:**")
         st.write(f"- **Best**: MN{best_setup['Magic_Number']} - {best_setup['Strategy_Name']} (€{best_setup['Total_Profit']:.2f})")
         st.write(f"- **Worst**: MN{worst_setup['Magic_Number']} - {worst_setup['Strategy_Name']} (€{worst_setup['Total_Profit']:.2f})")
 
@@ -228,16 +228,16 @@ def _render_table_controls(performance_df: pd.DataFrame, account_id: str):
         account_id: Account identifier
     """
     st.markdown("---")
-    st.markdown("#### ⚙️ Controlli Tabella")
+    st.markdown("#### Controlli Tabella")
     
     col1, col2 = st.columns(2)
     
     with col1:
         # Export button
-        if st.button("📥 Esporta Tabella", key=f"export_table_{account_id}", use_container_width=True):
+        if st.button("Esporta Tabella", key=f"export_table_{account_id}", use_container_width=True):
             csv_data = performance_df.to_csv(index=False)
             st.download_button(
-                label="💾 Download CSV",
+                label="Download CSV",
                 data=csv_data,
                 file_name=f"performance_table_{account_id}_{pd.Timestamp.now().strftime('%Y%m%d_%H%M')}.csv",
                 mime="text/csv",
@@ -246,9 +246,9 @@ def _render_table_controls(performance_df: pd.DataFrame, account_id: str):
     
     with col2:
         # Refresh data button
-        if st.button("🔄 Aggiorna Dati", key=f"refresh_table_{account_id}", use_container_width=True):
+        if st.button("Aggiorna Dati", key=f"refresh_table_{account_id}", use_container_width=True):
             st.cache_data.clear()
-            st.success("✅ Cache pulita! I dati saranno aggiornati.")
+            st.success("[OK] Cache pulita! I dati saranno aggiornati.")
 
 
 def render_advanced_table_analysis(performance_df: pd.DataFrame, account_id: str):
@@ -259,7 +259,7 @@ def render_advanced_table_analysis(performance_df: pd.DataFrame, account_id: str
         performance_df: Performance metrics DataFrame
         account_id: Account identifier
     """
-    with st.expander("📈 Analisi Avanzata Setup", expanded=False):
+    with st.expander("Analisi Avanzata Setup", expanded=False):
         if performance_df.empty:
             st.info("Nessun dato disponibile per analisi avanzata")
             return
@@ -281,7 +281,7 @@ def _render_setup_correlations(performance_df: pd.DataFrame):
     Args:
         performance_df: Performance metrics DataFrame
     """
-    st.markdown("**🔗 Correlazioni Setup:**")
+    st.markdown("**Correlazioni Setup:**")
     
     # Select numeric columns for correlation
     numeric_cols = ['Total_Profit', 'Win_Rate', 'Profit_Factor', 'Max_Drawdown']
@@ -301,7 +301,7 @@ def _render_performance_distribution(performance_df: pd.DataFrame):
     Args:
         performance_df: Performance metrics DataFrame
     """
-    st.markdown("**📊 Distribuzione Performance:**")
+    st.markdown("**Distribuzione Performance:**")
     
     if 'Total_Profit' in performance_df.columns:
         profit_data = performance_df['Total_Profit']
@@ -325,7 +325,7 @@ def _render_risk_return_analysis(performance_df: pd.DataFrame):
     Args:
         performance_df: Performance metrics DataFrame
     """
-    st.markdown("**⚖️ Analisi Rischio-Rendimento:**")
+    st.markdown("**Analisi Rischio-Rendimento:**")
     
     if all(col in performance_df.columns for col in ['Total_Profit', 'Max_Drawdown']):
         # Calculate risk-adjusted metrics
@@ -337,7 +337,7 @@ def _render_risk_return_analysis(performance_df: pd.DataFrame):
         # Show top risk-adjusted performers
         top_performers = performance_df_copy.nlargest(3, 'Risk_Adjusted_Return')
         
-        st.markdown("**🏆 Top Risk-Adjusted Performers:**")
+        st.markdown("**Top Risk-Adjusted Performers:**")
         for idx, setup in top_performers.iterrows():
             st.write(f"- MN{setup['Magic_Number']}: {setup['Risk_Adjusted_Return']:.2f}")
 

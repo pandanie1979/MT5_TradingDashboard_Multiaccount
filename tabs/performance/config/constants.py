@@ -152,10 +152,10 @@ SUCCESS_MESSAGES = {
 # Tab Names and Icons
 TAB_CONFIG = {
     "tabs": [
-        {"name": "Equity/Drawdown/Margin", "icon": "📈"},
-        {"name": "Performance Summary", "icon": "📊"},
-        {"name": "Setup Performance Table", "icon": "📋"},
-        {"name": "Recent Deals", "icon": "🔍"}
+        {"name": "Equity/Drawdown/Margin", "icon": "[CHART]"},
+        {"name": "Performance Summary", "icon": "[SUMMARY]"},
+        {"name": "Setup Performance Table", "icon": "[TABLE]"},
+        {"name": "Recent Deals", "icon": "[SEARCH]"}
     ]
 }
 

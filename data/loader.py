@@ -119,7 +119,7 @@ def get_trades_data(account_id: str, mt5_path: str):
                     progress_bar.progress(progress)
                     progress_text.text(f"Caricamento file Account {account_id}: {idx + 1}/{len(account_files)}...")
 
-                # ✅ CHIAVE: Estrai filename PRIMA del caricamento CSV
+                # CHIAVE: Estrai filename PRIMA del caricamento CSV
                 filename = os.path.basename(file_path)
                 
                 # Prova encoding multipli
@@ -147,7 +147,7 @@ def get_trades_data(account_id: str, mt5_path: str):
                     completed_trades['Account_ID'] = account_id
                     completed_trades['LogFile'] = filename  # Nome file corto
                     
-                    # ✅ AGGIUNTA CRITICA: Cattura filename per classificazione
+                    # AGGIUNTA CRITICA: Cattura filename per classificazione
                     completed_trades['SourceFilename'] = filename
                     
                     # Estrai info dal nome file
@@ -190,7 +190,7 @@ def get_trades_data(account_id: str, mt5_path: str):
         unique_trades = trades_df['OpenPositionTicket'].nunique()
         total_deals = len(trades_df)
         
-        # ✅ AGGIUNTA: Debug info filename pattern per sidebar
+        # AGGIUNTA: Debug info filename pattern per sidebar
         filenames_with_000000 = trades_df['SourceFilename'].str.contains('_000000', na=False).sum()
         filenames_without_000000 = len(trades_df) - filenames_with_000000
         
@@ -236,7 +236,7 @@ def check_mt5_connection(account_id: str, mt5_path: str):
         'path': mt5_path
     }
 
-# ✅ AGGIUNTA: Funzione helper per debug filename patterns
+# Funzione helper per debug filename patterns
 @st.cache_data(ttl=CACHE_TTL_EA)
 def analyze_filename_patterns(account_id: str, mt5_path: str):
     """

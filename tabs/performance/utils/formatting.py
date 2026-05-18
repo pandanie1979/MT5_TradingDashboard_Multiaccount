@@ -1,4 +1,4 @@
-﻿# MT5 Trading Dashboard - Formatting Utilities
+# MT5 Trading Dashboard - Formatting Utilities
 # File: tabs/performance/utils/formatting.py
 # Generated: September 2025
 # Refactoring: v1.4 -> v1.5
@@ -119,8 +119,8 @@ def format_account_badge(account_id: str, color: str = '#1f77b4') -> str:
     <div style="display: inline-block; padding: 4px 8px; background: {color}22; 
                 color: {color}; border: 1px solid {color}44; border-radius: 12px; 
                 font-size: 12px; font-weight: bold; margin: 2px;">
-        🏦 {account_id}
-    </div>
+        {account_id}
+</div>
     """
 
 
@@ -195,11 +195,11 @@ def format_profit_indicator(profit: float) -> str:
         return "N/A"
     
     if profit > 0:
-        return f"<span style='color: green; font-weight: bold;'>🟢 +{profit:.0f}€</span>"
+        return f"<span style='color: green; font-weight: bold;'>+{profit:.0f}€</span>"
     elif profit < 0:
-        return f"<span style='color: red; font-weight: bold;'>🔴 {profit:.0f}€</span>"
+        return f"<span style='color: red; font-weight: bold;'>{profit:.0f}€</span>"
     else:
-        return f"<span style='color: gray; font-weight: bold;'>⚪ 0€</span>"
+        return f"<span style='color: gray; font-weight: bold;'>0€</span>"
 
 
 def format_trade_type_badge(trade_type: str) -> str:
@@ -213,9 +213,9 @@ def format_trade_type_badge(trade_type: str) -> str:
         String HTML con badge colorato
     """
     if trade_type == 'backtest':
-        return "<span style='background: #cccccc; color: #333; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: bold;'>🔘 BT</span>"
+        return "<span style='background: #cccccc; color: #333; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: bold;'>BT</span>"
     else:
-        return "<span style='background: #1f77b4; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: bold;'>🔵 LIVE</span>"
+        return "<span style='background: #1f77b4; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: bold;'>LIVE</span>"
 
 
 def format_setup_display_name(magic_number: int, strategy_name: str, symbol: str, 
@@ -386,10 +386,10 @@ def create_info_box(title: str, content: str, box_type: str = "info") -> str:
         String HTML per box informativo
     """
     colors = {
-        "info": {"bg": "#e3f2fd", "border": "#2196f3", "icon": "ℹ️"},
-        "success": {"bg": "#e8f5e8", "border": "#4caf50", "icon": "✅"},
-        "warning": {"bg": "#fff3e0", "border": "#ff9800", "icon": "⚠️"},
-        "error": {"bg": "#ffebee", "border": "#f44336", "icon": "❌"}
+        "info": {"bg": "#e3f2fd", "border": "#2196f3", "icon": "[i]"},
+        "success": {"bg": "#e8f5e8", "border": "#4caf50", "icon": "[OK]"},
+        "warning": {"bg": "#fff3e0", "border": "#ff9800", "icon": "⚠"},
+        "error": {"bg": "#ffebee", "border": "#f44336", "icon": "[ERR]"}
     }
     
     config = colors.get(box_type, colors["info"])

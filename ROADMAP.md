@@ -6,7 +6,7 @@
 
 ## Current sprint
 
-**R3 — UI polish and production hardening** | STATUS: `READY`
+**R4 — Feature development** | STATUS: `PLANNED`
 
 ---
 
@@ -87,8 +87,8 @@
 
 ---
 
-### R3 — UI polish and production hardening
-**STATUS**: `READY`
+### R3 — UI polish and production hardening (COMPLETED)
+**STATUS**: `DONE`
 **Branch**: `refactor/r3-polish`
 **Scope**: Production-ready output. No structural changes.
 **ADRs in effect**: all

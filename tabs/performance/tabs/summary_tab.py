@@ -27,7 +27,7 @@ def render_performance_summary_tab(period_trades: pd.DataFrame, account_id: str,
         account_id: Account identifier
         account_color: Account color for styling
     """
-    st.markdown(f"### 📊 Performance Summary - Account {account_id}")
+    st.markdown(f"### Performance Summary - Account {account_id}")
     
     if period_trades.empty:
         st.warning(get_error_message("no_data"))
@@ -132,13 +132,13 @@ def _render_performance_base_section(metrics: Dict[str, Any]):
     Args:
         metrics: Calculated metrics dictionary
     """
-    st.markdown("#### 📊 Performance Base")
+    st.markdown("#### Performance Base")
     col1, col2, col3 = st.columns(3)
     
     with col1:
         profit_delta = f"€{metrics['total_profit']/metrics['unique_trades']:.0f}/trade" if metrics['unique_trades'] > 0 else None
         st.metric(
-            label="💰 Profit Totale",
+            label="Profit Totale",
             value=f"€{metrics['total_profit']:.0f}",
             delta=profit_delta
         )
@@ -146,7 +146,7 @@ def _render_performance_base_section(metrics: Dict[str, Any]):
     with col2:
         win_delta = f"{metrics['winning_trades']}/{metrics['unique_trades']}"
         st.metric(
-            label="🎯 Win Rate",
+            label="Win Rate",
             value=f"{metrics['win_rate']:.1f}%",
             delta=win_delta
         )
@@ -154,7 +154,7 @@ def _render_performance_base_section(metrics: Dict[str, Any]):
     with col3:
         pf_display = f"{metrics['profit_factor']:.2f}" if metrics['profit_factor'] != float('inf') else "∞"
         st.metric(
-            label="⚖️ Profit Factor",
+            label="Profit Factor",
             value=pf_display,
             delta="Wins/Losses"
         )
@@ -167,26 +167,26 @@ def _render_risk_metrics_section(metrics: Dict[str, Any]):
     Args:
         metrics: Calculated metrics dictionary
     """
-    st.markdown("#### 🔥 Risk Metrics")
+    st.markdown("#### Risk Metrics")
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.metric(
-            label="🔥 Max Win Streak",
+            label="Max Win Streak",
             value=f"{metrics['max_win_streak']}",
             delta="consecutivi"
         )
     
     with col2:
         st.metric(
-            label="❄️ Max Loss Streak",
+            label="Max Loss Streak",
             value=f"{metrics['max_loss_streak']}",
             delta="consecutivi"
         )
     
     with col3:
         st.metric(
-            label="📊 Sharpe Ratio",
+            label="Sharpe Ratio",
             value=f"{metrics['sharpe_ratio']:.2f}",
             delta="risk-adj return"
         )
@@ -199,26 +199,26 @@ def _render_drawdown_analysis_section(metrics: Dict[str, Any]):
     Args:
         metrics: Calculated metrics dictionary
     """
-    st.markdown("#### 📉 Drawdown Analysis")
+    st.markdown("#### Drawdown Analysis")
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.metric(
-            label="📉 Max Drawdown",
+            label="Max Drawdown",
             value=f"€{metrics['max_drawdown']:.0f}",
             delta="peak-to-trough"
         )
     
     with col2:
         st.metric(
-            label="📊 Avg Drawdown",
+            label="Avg Drawdown",
             value=f"€{metrics['avg_drawdown']:.0f}",
             delta="media DD"
         )
     
     with col3:
         st.metric(
-            label="⏱️ DD Duration",
+            label="DD Duration",
             value=f"{metrics['max_dd_duration']}",
             delta="deals in DD"
         )
@@ -231,12 +231,12 @@ def _render_margin_stats_section(metrics: Dict[str, Any]):
     Args:
         metrics: Calculated metrics dictionary
     """
-    st.markdown("#### 💰 Margine & Stats")
+    st.markdown("#### Margine & Stats")
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.metric(
-            label="💰 Max Margine",
+            label="Max Margine",
             value=f"€{metrics['max_margin']:.0f}",
             delta="picco utilizzo"
         )
@@ -244,7 +244,7 @@ def _render_margin_stats_section(metrics: Dict[str, Any]):
     with col2:
         deals_delta = f"{metrics['total_deals']:,} deals"
         st.metric(
-            label="📈 Trades Unici",
+            label="Trades Unici",
             value=f"{metrics['unique_trades']:,}",
             delta=deals_delta
         )
@@ -252,7 +252,7 @@ def _render_margin_stats_section(metrics: Dict[str, Any]):
     with col3:
         avg_win_loss = f"€{metrics['avg_win']:.0f}/€{metrics['avg_loss']:.0f}"
         st.metric(
-            label="💎 Avg Win/Loss",
+            label="Avg Win/Loss",
             value=avg_win_loss,
             delta="per trade"
         )
@@ -267,7 +267,7 @@ def render_performance_insights(metrics: Dict[str, Any], account_id: str):
         account_id: Account identifier
     """
     st.markdown("---")
-    st.markdown("#### 🔍 Performance Insights")
+    st.markdown("#### Performance Insights")
     
     insights = _generate_performance_insights(metrics)
     
@@ -296,38 +296,38 @@ def _generate_performance_insights(metrics: Dict[str, Any]) -> list:
     if metrics['profit_factor'] > 2.0:
         insights.append({
             'type': 'success',
-            'message': f"🎉 Excellent Profit Factor ({metrics['profit_factor']:.2f}) - Strong strategy performance!"
+            'message': f"Excellent Profit Factor ({metrics['profit_factor']:.2f}) - Strong strategy performance!"
         })
     elif metrics['profit_factor'] < 1.0:
         insights.append({
             'type': 'warning',
-            'message': f"⚠️ Profit Factor below 1.0 ({metrics['profit_factor']:.2f}) - Strategy losing money overall"
+            'message': f"⚠ Profit Factor below 1.0 ({metrics['profit_factor']:.2f}) - Strategy losing money overall"
         })
     
     # Win Rate Analysis
     if metrics['win_rate'] > 70:
         insights.append({
             'type': 'success',
-            'message': f"✅ High win rate ({metrics['win_rate']:.1f}%) - Consistent winning strategy"
+            'message': f"[OK] High win rate ({metrics['win_rate']:.1f}%) - Consistent winning strategy"
         })
     elif metrics['win_rate'] < 30:
         insights.append({
             'type': 'warning',
-            'message': f"📉 Low win rate ({metrics['win_rate']:.1f}%) - Consider strategy optimization"
+            'message': f"Low win rate ({metrics['win_rate']:.1f}%) - Consider strategy optimization"
         })
     
     # Drawdown Analysis
     if abs(metrics['max_drawdown']) > abs(metrics['total_profit']) * 0.3:
         insights.append({
             'type': 'warning',
-            'message': f"🔻 High drawdown risk - Max DD (€{metrics['max_drawdown']:.0f}) is significant vs profit"
+            'message': f"[HIGH DD] High drawdown risk - Max DD (€{metrics['max_drawdown']:.0f}) is significant vs profit"
         })
     
     # Streak Analysis
     if metrics['max_loss_streak'] > 10:
         insights.append({
             'type': 'info',
-            'message': f"📊 Long loss streak detected ({metrics['max_loss_streak']} consecutive) - Monitor risk management"
+            'message': f"Long loss streak detected ({metrics['max_loss_streak']} consecutive) - Monitor risk management"
         })
     
     return insights

@@ -93,7 +93,7 @@ def main():
         "\U0001f4c8 Performance",
         "\U0001f4ca EA Attivi",
         "\U0001f4b0 Posizioni",
-        "⚙️ Impostazioni"
+        "Impostazioni"
     ])
 
     with tab1:

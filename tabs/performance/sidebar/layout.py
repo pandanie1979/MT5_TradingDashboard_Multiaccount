@@ -47,15 +47,15 @@ def render_scrollable_sidebar(trades_df: pd.DataFrame, account_id: str,
     st.markdown("---")
     
     # Period Selection (SIMPLIFIED - no preset buttons)
-    with st.expander("📅 Periodo di Analisi", expanded=get_default_expanded("period_analysis")):
+    with st.expander("Periodo di Analisi", expanded=get_default_expanded("period_analysis")):
         render_period_selection_enhanced(trades_df, account_id)
     
     # Setup Selection (without container boxes)
-    with st.expander("🎯 Selezione Setup", expanded=get_default_expanded("setup_selection")):
+    with st.expander("Selezione Setup", expanded=get_default_expanded("setup_selection")):
         render_setup_selection_clean(trades_df, account_id)
     
     # REMOVED: Advanced Filters section
-    # with st.expander("🔍 Filtri Avanzati", expanded=get_default_expanded("advanced_filters")):
+    # with st.expander("Filtri Avanzati", expanded=get_default_expanded("advanced_filters")):
     #     render_advanced_filters_panel(trades_df, account_id)
     
     # Debug Tools (only when DASHBOARD_DEBUG=true)
@@ -73,7 +73,7 @@ def render_sidebar_width_control(account_id: str):
     Args:
         account_id: Account identifier
     """
-    st.markdown("### 🎛️ Layout")
+    st.markdown("### Layout")
     
     current_width = get_sidebar_width(account_id)
     
@@ -85,15 +85,15 @@ def render_sidebar_width_control(account_id: str):
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("📱20%", key=f"preset_compact_{account_id}", use_container_width=True):
+        if st.button("20%", key=f"preset_compact_{account_id}", use_container_width=True):
             set_sidebar_width(account_id, SIDEBAR_PRESETS["compact"])
-    
+
     with col2:
-        if st.button("💻25%", key=f"preset_normal_{account_id}", use_container_width=True):
+        if st.button("25%", key=f"preset_normal_{account_id}", use_container_width=True):
             set_sidebar_width(account_id, SIDEBAR_PRESETS["normal"])
-    
+
     with col3:
-        if st.button("🖥️35%", key=f"preset_wide_{account_id}", use_container_width=True):
+        if st.button("35%", key=f"preset_wide_{account_id}", use_container_width=True):
             set_sidebar_width(account_id, SIDEBAR_PRESETS["wide"])
 
 
@@ -107,7 +107,7 @@ def render_sidebar_header(account_id: str, account_color: str):
     """
     st.markdown(f"""
     <div style="border-left: 4px solid {account_color}; padding-left: 12px; margin-bottom: 20px;">
-        <h3 style="margin: 0; color: {account_color};">⚙️ Impostazioni</h3>
+        <h3 style="margin: 0; color: {account_color};">Impostazioni</h3>
         <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Account: {account_id}</p>
     </div>
     """, unsafe_allow_html=True)
@@ -121,7 +121,7 @@ def render_sidebar_footer(account_id: str):
         account_id: Account identifier
     """
     st.markdown("---")
-    st.markdown("### 📊 Quick Stats")
+    st.markdown("### Quick Stats")
     
     # Show current configuration summary
     current_width = get_sidebar_width(account_id)

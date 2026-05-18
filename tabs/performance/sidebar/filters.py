@@ -65,11 +65,11 @@ def _render_trade_type_filter(account_id: str):
     
     # Show explanation for each filter type
     if trade_type_filter == "Solo Backtest":
-        st.caption("🔘 Solo trade da Strategy Tester MT5")
+        st.caption("Solo trade da Strategy Tester MT5")
     elif trade_type_filter == "Solo Live":
-        st.caption("🔵 Solo trade da trading reale")
+        st.caption("Solo trade da trading reale")
     else:
-        st.caption("📊 Tutti i trade (backtest + live)")
+        st.caption("Tutti i trade (backtest + live)")
 
 
 def _render_performance_thresholds(account_id: str):
@@ -142,11 +142,11 @@ def _render_symbol_filter(trades_df: pd.DataFrame, account_id: str):
         
         # Show selection summary
         if len(selected_symbols) == len(available_symbols):
-            st.caption("📊 Tutti i simboli selezionati")
+            st.caption("Tutti i simboli selezionati")
         elif len(selected_symbols) == 0:
-            st.warning("⚠️ Nessun simbolo selezionato")
+            st.warning("⚠ Nessun simbolo selezionato")
         else:
-            st.caption(f"📈 {len(selected_symbols)}/{len(available_symbols)} simboli selezionati")
+            st.caption(f"{len(selected_symbols)}/{len(available_symbols)} simboli selezionati")
             
             # Show selected symbols if not too many
             if len(selected_symbols) <= 5:
@@ -180,9 +180,9 @@ def _render_filter_summary(account_id: str):
     
     if active_filters:
         st.info("**Filtri Attivi:**\n" + "\n".join(active_filters))
-        st.caption("💡 I filtri Profit/DD si applicano ai SETUP (magic numbers), non ai singoli trade")
+        st.caption("I filtri Profit/DD si applicano ai SETUP (magic numbers), non ai singoli trade")
     else:
-        st.success("✅ Nessun filtro attivo")
+        st.success("[OK] Nessun filtro attivo")
 
 
 def _reset_all_filters(account_id: str):

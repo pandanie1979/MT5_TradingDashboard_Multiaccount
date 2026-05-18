@@ -1,6 +1,7 @@
 {
   "mt5_paths": [
     "C:\\Users\\<USERNAME>\\AppData\\Roaming\\MetaQuotes\\Terminal\\<TERMINAL_HASH>\\MQL5\\Files",
-    "C:\\Users\\<USERNAME>\\AppData\\Roaming\\MetaQuotes\\Terminal\\<TERMINAL_HASH_2>\\MQL5\\Files"
+    "C:\\Users\\<USERNAME>\\AppData\\Roaming\\MetaQuotes\\Terminal\\<TERMINAL_HASH_2>\\MQL5\\Files",
+    "C:\\Users\\Administrator\\AppData\\Roaming\\MetaQuotes\\Terminal\\<32HEXCHAR_HASH>\\MQL5\\Files"
   ]
 }

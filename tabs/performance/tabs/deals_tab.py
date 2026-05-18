@@ -24,7 +24,7 @@ def render_recent_deals_tab(period_trades: pd.DataFrame, account_id: str):
         period_trades: Filtered trades for current period and setups
         account_id: Account identifier
     """
-    st.markdown(f"### 🔍 Recent Deals - Account {account_id}")
+    st.markdown(f"### Recent Deals - Account {account_id}")
     
     if period_trades.empty:
         st.info(get_error_message("no_data"))
@@ -59,7 +59,7 @@ def _render_deals_table(period_trades: pd.DataFrame, account_id: str):
     
     # Show info about displayed deals
     unique_in_recent = recent_deals['OpenPositionTicket'].nunique()
-    st.info(f"📊 Ultimi {len(recent_deals)} deals da {unique_in_recent} trades unici")
+    st.info(f"Ultimi {len(recent_deals)} deals da {unique_in_recent} trades unici")
     
     # Prepare display data
     display_deals = _prepare_deals_display_data(recent_deals)
@@ -168,7 +168,7 @@ def _render_deals_statistics(period_trades: pd.DataFrame, account_id: str):
         account_id: Account identifier
     """
     st.markdown("---")
-    st.markdown("#### 📈 Statistiche Deals")
+    st.markdown("#### Statistiche Deals")
     
     # Calculate statistics
     stats = _calculate_deals_statistics(period_trades)
@@ -191,7 +191,7 @@ def _render_deals_statistics(period_trades: pd.DataFrame, account_id: str):
     
     # Additional statistics
     if stats['symbols_count'] > 1:
-        st.markdown("**📊 Distribuzione per Symbol:**")
+        st.markdown("**Distribuzione per Symbol:**")
         symbol_stats = _calculate_symbol_distribution(period_trades)
         
         for symbol, count in symbol_stats.items():
@@ -272,25 +272,25 @@ def _render_deals_controls(period_trades: pd.DataFrame, account_id: str):
     
     with col1:
         # Refresh data button
-        if st.button(f"🔄 Aggiorna Dati Account {account_id}", 
-                     key=f"refresh_data_tab4_{account_id}", 
+        if st.button(f"Aggiorna Dati Account {account_id}",
+                     key=f"refresh_data_tab4_{account_id}",
                      use_container_width=True):
             st.cache_data.clear()
-            st.success("✅ Cache pulita! I dati saranno aggiornati.")
+            st.success("[OK] Cache pulita! I dati saranno aggiornati.")
     
     with col2:
         # Toggle extended view
         show_extended = st.session_state.get(f'show_more_deals_{account_id}', False)
         
         if not show_extended:
-            if st.button("📋 Mostra più deals (100)", 
-                         key=f"show_more_deals_tab4_{account_id}", 
+            if st.button("Mostra piu deals (100)",
+                         key=f"show_more_deals_tab4_{account_id}",
                          use_container_width=True):
                 st.session_state[f'show_more_deals_{account_id}'] = True
                 st.rerun()
         else:
-            if st.button("📙 Mostra meno deals (50)", 
-                         key=f"hide_extended_deals_tab4_{account_id}", 
+            if st.button("Mostra meno deals (50)",
+                         key=f"hide_extended_deals_tab4_{account_id}",
                          use_container_width=True):
                 st.session_state[f'show_more_deals_{account_id}'] = False
                 st.rerun()
@@ -304,7 +304,7 @@ def render_deals_timeline_analysis(period_trades: pd.DataFrame, account_id: str)
         period_trades: Filtered trades DataFrame
         account_id: Account identifier
     """
-    with st.expander("📅 Analisi Timeline Deals", expanded=False):
+    with st.expander("Analisi Timeline Deals", expanded=False):
         if period_trades.empty:
             st.info("Nessun dato disponibile per analisi timeline")
             return
@@ -323,7 +323,7 @@ def _render_daily_activity_analysis(period_trades: pd.DataFrame):
     Args:
         period_trades: Filtered trades DataFrame
     """
-    st.markdown("**📅 Attività Giornaliera:**")
+    st.markdown("**Attività Giornaliera:**")
     
     # Group by date
     period_trades_copy = period_trades.copy()
@@ -362,7 +362,7 @@ def _render_recent_activity_trends(period_trades: pd.DataFrame):
     Args:
         period_trades: Filtered trades DataFrame
     """
-    st.markdown("**📈 Trend Attività Recente:**")
+    st.markdown("**Trend Attività Recente:**")
     
     # Compare last 7 days vs previous 7 days
     if len(period_trades) < 14:

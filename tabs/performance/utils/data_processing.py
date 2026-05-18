@@ -479,7 +479,7 @@ def render_timestamp_corrections_debug(timeline_df: pd.DataFrame):
     corrections = timeline_df.attrs.get('timestamp_corrections', [])
     
     if corrections:
-        st.warning(f"⚠️ **TIMESTAMP CORRECTIONS**: {len(corrections)} correzioni applicate")
+        st.warning(f"⚠ **TIMESTAMP CORRECTIONS**: {len(corrections)} correzioni applicate")
         
         st.write("**Dettagli correzioni timestamp invertiti:**")
         
@@ -515,11 +515,11 @@ def render_timestamp_corrections_debug(timeline_df: pd.DataFrame):
         }
         
         st.download_button(
-            label="📥 Download Dettagli Correzioni",
+            label="Download Dettagli Correzioni",
             data=str(corrections_json),
             file_name=f"timestamp_corrections_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
             mime="application/json"
         )
     
     else:
-        st.success("✅ **TIMESTAMP OK**: Nessuna correzione necessaria")
+        st.success("[OK] **TIMESTAMP OK**: Nessuna correzione necessaria")

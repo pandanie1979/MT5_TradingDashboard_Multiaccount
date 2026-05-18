@@ -13,7 +13,7 @@ def render(account_id: str, account_path: str, account_info: dict):
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
         <div style="width: 4px; height: 40px; background: {account_color}; margin-right: 15px; border-radius: 2px;"></div>
         <div>
-            <h2 style="margin: 0; color: #1f1f1f;">📊 Expert Advisors Attivi</h2>
+            <h2 style="margin: 0; color: #1f1f1f;">Expert Advisors Attivi</h2>
             <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Account: {account_id} | 
             {account_info.get('ea_files', 0)} file EA trovati</p>
         </div>
@@ -23,9 +23,9 @@ def render(account_id: str, account_path: str, account_info: dict):
     ea_df = get_ea_data(account_id, account_path)
 
     if ea_df is None or ea_df.empty:
-        st.error(f"❌ Impossibile caricare i dati degli EA per Account {account_id}.")
-        st.info(f"📁 Percorso verificato: `{account_path}`")
-        st.info(f"🔍 Pattern cercato: `EAMon_{account_id}_*.csv`")
+        st.error(f"[ERR] Impossibile caricare i dati degli EA per Account {account_id}.")
+        st.info(f"Percorso verificato: `{account_path}`")
+        st.info(f"Pattern cercato: `EAMon_{account_id}_*.csv`")
         
         # Mostra status connessione
         if os.path.exists(account_path):
@@ -36,7 +36,7 @@ def render(account_id: str, account_path: str, account_info: dict):
                 for f in all_ea_files[:5]:
                     st.write(f"- {f}")
         else:
-            st.error(f"❌ Cartella non accessibile: {account_path}")
+            st.error(f"[ERR] Cartella non accessibile: {account_path}")
         
         return
 
@@ -59,7 +59,7 @@ def render(account_id: str, account_path: str, account_info: dict):
     if len(ea_df) > 0:
         inactive_ea = ea_df[ea_df['Status'] != 'ACTIVE']
         if not inactive_ea.empty:
-            st.warning(f"⚠️ {len(inactive_ea)} EA non attivi trovati per Account {account_id}")
+            st.warning(f"⚠ {len(inactive_ea)} EA non attivi trovati per Account {account_id}")
 
     st.markdown("---")
 
@@ -92,7 +92,7 @@ def render(account_id: str, account_path: str, account_info: dict):
     if ea_filter != 'Tutti':
         filtered_df = filtered_df[filtered_df['EA_Name'] == ea_filter]
 
-    st.subheader(f"📋 Elenco EA Account {account_id} ({len(filtered_df)} di {len(ea_df)})")
+    st.subheader(f"Elenco EA Account {account_id} ({len(filtered_df)} di {len(ea_df)})")
 
     if not filtered_df.empty:
         display_df = filtered_df.copy()
@@ -140,7 +140,7 @@ def render(account_id: str, account_path: str, account_info: dict):
         )
 
         st.markdown("---")
-        st.subheader(f"📊 Dettagli EA Selezionato - Account {account_id}")
+        st.subheader(f"Dettagli EA Selezionato - Account {account_id}")
 
         selected_setup = st.selectbox(
             "Seleziona un setup per i dettagli",
@@ -172,7 +172,7 @@ def render(account_id: str, account_path: str, account_info: dict):
                 """)
 
             # Timeline EA
-            st.markdown("**📈 Timeline EA:**")
+            st.markdown("**Timeline EA:**")
             col1, col2, col3 = st.columns(3)
             with col1:
                 if pd.notna(selected_ea['EA_Start_Time']):
@@ -190,7 +190,7 @@ def render(account_id: str, account_path: str, account_info: dict):
 
         # Alert specifici per account
         st.markdown("---")
-        st.subheader(f"⚠️ Monitoraggio Account {account_id}")
+        st.subheader(f"Monitoraggio Account {account_id}")
 
         # Check EA inattivi con posizioni
         inactive_with_positions = filtered_df[
@@ -199,7 +199,7 @@ def render(account_id: str, account_path: str, account_info: dict):
         ]
         
         if not inactive_with_positions.empty:
-            st.error(f"🚨 {len(inactive_with_positions)} EA inattivi con posizioni aperte:")
+            st.error(f"[ALERT] {len(inactive_with_positions)} EA inattivi con posizioni aperte:")
             for _, ea in inactive_with_positions.iterrows():
                 st.write(f"- **{ea['Setup_Name']}** ({ea['Symbol']}): Status = {ea['Status']}, Margine = €{ea['Position_Margin']:.2f}")
 
@@ -211,13 +211,13 @@ def render(account_id: str, account_path: str, account_info: dict):
         ]
         
         if not old_ticks.empty:
-            st.warning(f"⚠️ {len(old_ticks)} EA attivi senza tick da >5 minuti:")
+            st.warning(f"⚠ {len(old_ticks)} EA attivi senza tick da >5 minuti:")
             for _, ea in old_ticks.iterrows():
                 minutes_ago = (now - pd.to_datetime(ea['Last_Tick_Time'])).total_seconds() / 60
                 st.write(f"- **{ea['Setup_Name']}** ({ea['Symbol']}): {minutes_ago:.1f} minuti fa")
         else:
             if len(filtered_df[filtered_df['Status'] == 'ACTIVE']) > 0:
-                st.success(f"✅ Tutti gli EA attivi di Account {account_id} ricevono tick regolarmente")
+                st.success(f"[OK] Tutti gli EA attivi di Account {account_id} ricevono tick regolarmente")
 
     else:
         st.info(f"Nessun EA corrisponde ai filtri selezionati per Account {account_id}.")
@@ -227,10 +227,10 @@ def render(account_id: str, account_path: str, account_info: dict):
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button(f"🔄 Aggiorna EA Account {account_id}", use_container_width=True):
+        if st.button(f"Aggiorna EA Account {account_id}", use_container_width=True):
             st.cache_data.clear()
             # NON usare st.rerun() per preservare stato tab
-            st.success("✅ Cache pulita! I dati EA saranno aggiornati automaticamente.")
+            st.success("[OK] Cache pulita! I dati EA saranno aggiornati automaticamente.")
     
     with col2:
         # Spazio libero - pulsante navigazione rimosso
