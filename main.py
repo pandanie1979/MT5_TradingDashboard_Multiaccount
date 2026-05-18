@@ -25,6 +25,7 @@ def _ensure_basic_session_state(account_id: str):
         st.session_state[f"basic_init_{account_id}"] = True
 
 
+def load_css() -> str:
     """Load CSS stylesheet."""
     try:
         with open("assets/style.css", "r", encoding="utf-8") as f:
