@@ -68,7 +68,7 @@ def _render_performance_table(performance_df: pd.DataFrame):
     # Display table with enhanced configuration
     st.dataframe(
         display_df,
-        width='stretch',
+        use_container_width=True,
         hide_index=True,
         column_config=column_config,
         height=TABLE_CONFIG["performance_table"]["height"]
@@ -234,7 +234,7 @@ def _render_table_controls(performance_df: pd.DataFrame, account_id: str):
     
     with col1:
         # Export button
-        if st.button("📥 Esporta Tabella", key=f"export_table_{account_id}", width='stretch'):
+        if st.button("📥 Esporta Tabella", key=f"export_table_{account_id}", use_container_width=True):
             csv_data = performance_df.to_csv(index=False)
             st.download_button(
                 label="💾 Download CSV",
@@ -246,7 +246,7 @@ def _render_table_controls(performance_df: pd.DataFrame, account_id: str):
     
     with col2:
         # Refresh data button
-        if st.button("🔄 Aggiorna Dati", key=f"refresh_table_{account_id}", width='stretch'):
+        if st.button("🔄 Aggiorna Dati", key=f"refresh_table_{account_id}", use_container_width=True):
             st.cache_data.clear()
             st.success("✅ Cache pulita! I dati saranno aggiornati.")
 
@@ -289,7 +289,7 @@ def _render_setup_correlations(performance_df: pd.DataFrame):
     
     if len(available_cols) >= 2:
         corr_matrix = performance_df[available_cols].corr()
-        st.dataframe(corr_matrix, width='stretch')
+        st.dataframe(corr_matrix, use_container_width=True)
     else:
         st.info("Dati insufficienti per analisi correlazioni")
 

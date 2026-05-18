@@ -81,15 +81,15 @@ def render_sidebar_width_control(account_id: str):
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("📱20%", key=f"preset_compact_{account_id}", width='stretch'):
+        if st.button("📱20%", key=f"preset_compact_{account_id}", use_container_width=True):
             set_sidebar_width(account_id, SIDEBAR_PRESETS["compact"])
     
     with col2:
-        if st.button("💻25%", key=f"preset_normal_{account_id}", width='stretch'):
+        if st.button("💻25%", key=f"preset_normal_{account_id}", use_container_width=True):
             set_sidebar_width(account_id, SIDEBAR_PRESETS["normal"])
     
     with col3:
-        if st.button("🖥️35%", key=f"preset_wide_{account_id}", width='stretch'):
+        if st.button("🖥️35%", key=f"preset_wide_{account_id}", use_container_width=True):
             set_sidebar_width(account_id, SIDEBAR_PRESETS["wide"])
 
 

@@ -489,7 +489,7 @@ def render_timestamp_corrections_debug(timeline_df: pd.DataFrame):
         display_df = corrections_df[['ticket', 'original_open', 'original_close', 'corrected_close', 'time_diff_original', 'exit_reason']]
         display_df.columns = ['Ticket', 'OpenDatetime', 'CloseDatetime (Originale)', 'CloseDatetime (Corretta)', 'Diff Originale (sec)', 'ExitReason']
         
-        st.dataframe(display_df, width='stretch')
+        st.dataframe(display_df, use_container_width=True)
         
         # Statistiche
         col1, col2, col3 = st.columns(3)

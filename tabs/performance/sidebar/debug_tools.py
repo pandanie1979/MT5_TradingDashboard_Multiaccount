@@ -59,7 +59,7 @@ def _render_data_analysis_tools(trades_df: pd.DataFrame, account_id: str):
     """
     st.markdown("**Analisi Dati:**")
     
-    if st.button("📊 Analizza Dataset", key=f"analyze_data_{account_id}", width='stretch'):
+    if st.button("📊 Analizza Dataset", key=f"analyze_data_{account_id}", use_container_width=True):
         if not trades_df.empty:
             stats = _calculate_dataset_statistics(trades_df)
             
@@ -94,7 +94,7 @@ def _render_classification_tools(trades_df: pd.DataFrame, account_id: str):
     """
     st.markdown("**Test Classificazione:**")
     
-    if st.button("🎯 Test Backtest/Live", key=f"test_classification_{account_id}", width='stretch'):
+    if st.button("🎯 Test Backtest/Live", key=f"test_classification_{account_id}", use_container_width=True):
         if not trades_df.empty:
             classified = classify_trades_backtest_vs_live(trades_df)
             results = debug_classification_results(classified)
@@ -127,17 +127,17 @@ def _render_system_tools(trades_df: pd.DataFrame, account_id: str, account_path:
     st.markdown("**Strumenti Sistema:**")
     
     # Cache management
-    if st.button("🗑️ Pulisci Cache", key=f"clear_cache_{account_id}", width='stretch'):
+    if st.button("🗑️ Pulisci Cache", key=f"clear_cache_{account_id}", use_container_width=True):
         st.cache_data.clear()
         st.success("✅ Cache pulita!")
     
     # Session state management
-    if st.button("🔄 Reset Sessione", key=f"reset_session_{account_id}", width='stretch'):
+    if st.button("🔄 Reset Sessione", key=f"reset_session_{account_id}", use_container_width=True):
         count = clear_account_session_state(account_id)
         st.success(f"✅ {count} chiavi di sessione rimosse!")
     
     # Configuration export
-    if st.button("📦 Esporta Config", key=f"export_config_{account_id}", width='stretch'):
+    if st.button("📦 Esporta Config", key=f"export_config_{account_id}", use_container_width=True):
         config = export_session_config(account_id)
         st.download_button(
             label="📥 Download Configurazione",

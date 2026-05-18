@@ -155,8 +155,8 @@ def render_debug_timeline_chart(timeline_df: pd.DataFrame, account_id: str, acco
     fig.update_yaxes(title_text="NÂ° Posizioni", row=2, col=1, gridcolor='lightgray')
     fig.update_xaxes(title_text="Data", row=2, col=1, gridcolor='lightgray')
     
-    st.plotly_chart(fig, width='stretch')
-    
+    st.plotly_chart(fig, use_container_width=True)
+
     # Highlight del problema finale
     final_row = timeline_df.iloc[-1]
     if final_row['total_margin_calculated'] > 0 and final_row['open_positions_count'] == 0:
@@ -247,7 +247,7 @@ def render_events_detail(debug_results: Dict, account_id: str):
         
         st.dataframe(
             filtered_timeline[display_columns],
-            width='stretch',
+            use_container_width=True,
             column_config={
                 "timestamp": st.column_config.DatetimeColumn("Data/Ora"),
                 "event_type": st.column_config.TextColumn("Tipo Evento"),
@@ -473,8 +473,8 @@ def render_comparison_with_current_timeline(debug_results: Dict, current_timelin
             height=400
         )
         
-        st.plotly_chart(fig, width='stretch')
-        
+        st.plotly_chart(fig, use_container_width=True)
+
         st.warning("âš ï¸ **Le timeline non coincidono!** Questo indica un problema nella logica di calcolo del margine.")
     else:
         st.success("✅ Le timeline coincidono perfettamente. Il problema potrebbe essere nei dati EA o nella logica di ricostruzione.")

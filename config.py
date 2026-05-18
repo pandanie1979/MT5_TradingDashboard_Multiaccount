@@ -6,10 +6,8 @@ from typing import Dict, List, Tuple
 import streamlit as st
 
 # Path predefiniti degli account MT5
-DEFAULT_MT5_PATHS = [
-    r"C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\7ED840DDCFDDCD9E053E1BDBFEACD96A\MQL5\Files",
-    r"C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\D0E8209F77C8CF37AD8BF550E51FF075\MQL5\Files"
-]
+# Populate accounts_config.json (copy from accounts_config.example.json) with real paths.
+DEFAULT_MT5_PATHS: list[str] = []
 
 # Configurazione Cache
 CACHE_TTL_EA = 300  # 5 minuti per dati EA

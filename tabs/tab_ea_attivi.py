@@ -129,8 +129,8 @@ def render(account_id: str, account_path: str, account_info: dict):
         styled_df = table_df.style.map(color_status, subset=['Status'])
 
         st.dataframe(
-            styled_df, 
-            width='stretch',
+            styled_df,
+            use_container_width=True,
             column_config={
                 "Margin (€)": st.column_config.NumberColumn(
                     "Margin (€)",
@@ -227,7 +227,7 @@ def render(account_id: str, account_path: str, account_info: dict):
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button(f"🔄 Aggiorna EA Account {account_id}", width='stretch'):
+        if st.button(f"🔄 Aggiorna EA Account {account_id}", use_container_width=True):
             st.cache_data.clear()
             # NON usare st.rerun() per preservare stato tab
             st.success("✅ Cache pulita! I dati EA saranno aggiornati automaticamente.")

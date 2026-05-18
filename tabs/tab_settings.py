@@ -59,7 +59,7 @@ def render_account_management(accounts_data: dict):
         # Mostra tabella con styling
         st.dataframe(
             df_accounts[['Account ID', 'Status', 'EA Files', 'Trade Files', 'Dettagli']],
-            width='stretch',
+            use_container_width=True,
             hide_index=True
         )
         
@@ -92,7 +92,7 @@ def render_account_management(accounts_data: dict):
             
             with col2:
                 # Test connessione in tempo reale
-                if st.button(f"ðŸ” Test Connessione Account {selected_account}", width='stretch'):
+                if st.button(f"ðŸ” Test Connessione Account {selected_account}", use_container_width=True):
                     with st.spinner("Verificando connessione..."):
                         from data.loader import check_mt5_connection
                         success, result = check_mt5_connection(selected_account, account_info['path'])
@@ -104,7 +104,7 @@ def render_account_management(accounts_data: dict):
                             st.error(f"âŒ Errore connessione: {result}")
                 
                 # Mostra file recenti
-                if st.button(f"ðŸ“‚ Mostra File Account {selected_account}", width='stretch'):
+                if st.button(f"ðŸ“‚ Mostra File Account {selected_account}", use_container_width=True):
                     show_account_files(selected_account, account_info['path'])
 
 def render_path_management():
@@ -154,9 +154,9 @@ def render_path_management():
         
         col1, col2 = st.columns(2)
         with col1:
-            submitted = st.form_submit_button("âž• Aggiungi Percorso", width='stretch')
+            submitted = st.form_submit_button("âž• Aggiungi Percorso", use_container_width=True)
         with col2:
-            if st.form_submit_button("ðŸ”„ Reset a Default", width='stretch'):
+            if st.form_submit_button("ðŸ”„ Reset a Default", use_container_width=True):
                 if save_accounts_config(DEFAULT_MT5_PATHS):
                     st.success("Configurazione resettata ai valori di default! Ricarica la pagina per vedere le modifiche.")
                     # ✅ RIMOSSO st.rerun() per preservare tab
@@ -183,7 +183,7 @@ def render_path_management():
     st.markdown("---")
     st.subheader("ðŸ’¡ Percorsi Suggeriti")
     
-    suggested_base = r"C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal"
+    suggested_base = os.path.join(os.path.expanduser("~"), "AppData", "Roaming", "MetaQuotes", "Terminal")
     
     if os.path.exists(suggested_base):
         terminals = [d for d in os.listdir(suggested_base) 
@@ -248,7 +248,7 @@ def render_debug_info(accounts_data: dict):
         cache_available = hasattr(st.cache_data, 'clear')
         st.write(f"Cache Streamlit: {'✅ Disponibile' if cache_available else 'âŒ Non disponibile'}")
         
-        if st.button("ðŸ§¹ Pulisci Cache", width='stretch'):
+        if st.button("ðŸ§¹ Pulisci Cache", use_container_width=True):
             st.cache_data.clear()
             st.success("Cache pulita!")
     
@@ -321,7 +321,7 @@ def render_debug_info(accounts_data: dict):
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("ðŸ”„ Riscansiona Account", width='stretch'):
+        if st.button("ðŸ”„ Riscansiona Account", use_container_width=True):
             with st.spinner("Riscansionando account..."):
                 mt5_paths = load_accounts_config()
                 new_accounts = discover_accounts_from_paths(mt5_paths)
@@ -329,7 +329,7 @@ def render_debug_info(accounts_data: dict):
                 # ✅ RIMOSSO st.rerun() per preservare tab
     
     with col2:
-        if st.button("ðŸ“Š Export Configurazione", width='stretch'):
+        if st.button("ðŸ“Š Export Configurazione", use_container_width=True):
             export_config = {
                 "mt5_paths": load_accounts_config(),
                 "accounts_data": accounts_data,
@@ -343,7 +343,7 @@ def render_debug_info(accounts_data: dict):
             )
     
     with col3:
-        if st.button("âš ï¸ Reset Completo", width='stretch'):
+        if st.button("âš ï¸ Reset Completo", use_container_width=True):
             if st.button("âš ï¸ CONFERMA RESET", key="confirm_reset", type="primary"):
                 # Reset configurazione
                 if save_accounts_config(DEFAULT_MT5_PATHS):

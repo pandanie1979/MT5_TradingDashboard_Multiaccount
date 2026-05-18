@@ -70,7 +70,7 @@ def _render_deals_table(period_trades: pd.DataFrame, account_id: str):
     # Display table
     st.dataframe(
         display_deals,
-        width='stretch',
+        use_container_width=True,
         hide_index=True,
         column_config=column_config,
         height=TABLE_CONFIG["deals_table"]["height"]
@@ -274,7 +274,7 @@ def _render_deals_controls(period_trades: pd.DataFrame, account_id: str):
         # Refresh data button
         if st.button(f"🔄 Aggiorna Dati Account {account_id}", 
                      key=f"refresh_data_tab4_{account_id}", 
-                     width='stretch'):
+                     use_container_width=True):
             st.cache_data.clear()
             st.success("✅ Cache pulita! I dati saranno aggiornati.")
     
@@ -285,13 +285,13 @@ def _render_deals_controls(period_trades: pd.DataFrame, account_id: str):
         if not show_extended:
             if st.button("📋 Mostra più deals (100)", 
                          key=f"show_more_deals_tab4_{account_id}", 
-                         width='stretch'):
+                         use_container_width=True):
                 st.session_state[f'show_more_deals_{account_id}'] = True
                 st.rerun()
         else:
             if st.button("📙 Mostra meno deals (50)", 
                          key=f"hide_extended_deals_tab4_{account_id}", 
-                         width='stretch'):
+                         use_container_width=True):
                 st.session_state[f'show_more_deals_{account_id}'] = False
                 st.rerun()
 
@@ -340,7 +340,7 @@ def _render_daily_activity_analysis(period_trades: pd.DataFrame):
     recent_days = daily_activity.tail(7)
     
     if not recent_days.empty:
-        st.dataframe(recent_days, width='stretch')
+        st.dataframe(recent_days, use_container_width=True)
         
         # Show daily averages
         col1, col2, col3 = st.columns(3)

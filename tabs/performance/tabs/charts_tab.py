@@ -128,7 +128,7 @@ def _render_multi_panel_chart(equity_data: pd.DataFrame, margin_timeline: pd.Dat
         )
         
         # Display chart
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig, use_container_width=True)
         
     except Exception as e:
         st.error(f"Errore nella creazione del grafico: {str(e)}")
