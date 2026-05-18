@@ -61,14 +61,12 @@ def discover_accounts_from_paths(mt5_paths: List[str]) -> Dict[str, Dict]:
                     account_ids.add(parts[0])
             
             # Da file Trade: ACCOUNT_Magic_Symbol_Strategy_...
+            # Require 6+ digit account IDs to avoid picking up magic numbers or other short parts.
             for file_path in trade_files:
                 filename = os.path.basename(file_path)
                 parts = filename.split('_')
-                if len(parts) >= 1:
-                    # Debug: stampa i primi caratteri per verificare il pattern
-                    potential_account = parts[0]
-                    if potential_account.isdigit() or potential_account.replace('.', '').isdigit():
-                        account_ids.add(potential_account)
+                if parts and parts[0].isdigit() and len(parts[0]) >= 6:
+                    account_ids.add(parts[0])
             
             # Aggiungi account trovati
             for account_id in account_ids:
@@ -81,6 +79,7 @@ def discover_accounts_from_paths(mt5_paths: List[str]) -> Dict[str, Dict]:
                         'path': path,
                         'ea_files': account_ea_files,
                         'trade_files': account_trade_files,
+                        'files_count': account_ea_files + account_trade_files,
                         'status': 'active',
                         'color': ACCOUNT_COLORS[len(discovered_accounts) % len(ACCOUNT_COLORS)]
                     }
@@ -101,6 +100,41 @@ def load_accounts_config() -> Dict[str, List[str]]:
     except Exception:
         pass
     return DEFAULT_MT5_PATHS
+
+def load_mt5_paths() -> List[str]:
+    """Carica percorsi MT5 da config JSON; fallback ad auto-discovery per l'utente corrente."""
+    paths = load_accounts_config()
+    if paths:
+        return paths
+
+    # Auto-discovery: cerca terminali MT5 nella cartella AppData dell'utente corrente.
+    terminal_base = os.path.join(
+        os.path.expanduser("~"), "AppData", "Roaming", "MetaQuotes", "Terminal"
+    )
+    direct_paths = [
+        os.path.join("C:\\", "Program Files", "MetaTrader 5", "MQL5", "Files"),
+        os.path.join("C:\\", "Program Files (x86)", "MetaTrader 5", "MQL5", "Files"),
+    ]
+
+    discovered: List[str] = []
+
+    if os.path.exists(terminal_base):
+        try:
+            for item in os.listdir(terminal_base):
+                item_path = os.path.join(terminal_base, item)
+                if os.path.isdir(item_path) and len(item) == 32:
+                    files_path = os.path.join(item_path, "MQL5", "Files")
+                    if os.path.exists(files_path):
+                        discovered.append(files_path)
+        except (PermissionError, OSError):
+            pass
+
+    for path in direct_paths:
+        if os.path.exists(path):
+            discovered.append(path)
+
+    return discovered
+
 
 def save_accounts_config(mt5_paths: List[str]):
     """Salva configurazione account su file JSON"""

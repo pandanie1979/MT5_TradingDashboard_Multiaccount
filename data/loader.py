@@ -5,6 +5,8 @@ import glob
 import re
 from config import SUPPORTED_ENCODINGS, EA_MONITOR_PATTERN, TRADE_FILE_PATTERN, CACHE_TTL_EA, CACHE_TTL_TRADES
 
+DEBUG = os.getenv("DASHBOARD_DEBUG", "false").lower() == "true"
+
 @st.cache_data(ttl=CACHE_TTL_EA)
 def get_ea_data(account_id: str, mt5_path: str):
     """Carica i dati di monitoraggio degli EA da file CSV per un account specifico"""
@@ -73,13 +75,12 @@ def get_ea_data(account_id: str, mt5_path: str):
                     ea_list.append(ea_info)
                     
             except Exception as e:
-                # Log errore ma continua con altri file
-                if st.sidebar.checkbox("Mostra errori EA dettagliati", value=False, key=f"show_ea_errors_{account_id}"):
-                    st.warning(f"âš ï¸ Errore nel file EA {os.path.basename(file_path)}: {str(e)}")
+                if DEBUG:
+                    st.warning(f"⚠ Errore nel file EA {os.path.basename(file_path)}: {str(e)}")
                 continue
                 
     except Exception as e:
-        st.error(f"âŒ Errore nell'accesso alla cartella MT5 per Account {account_id}: {str(e)}")
+        st.error(f"[Errore] Errore nell'accesso alla cartella MT5 per Account {account_id}: {str(e)}")
         return pd.DataFrame()
 
     return pd.DataFrame(ea_list)
@@ -163,8 +164,8 @@ def get_trades_data(account_id: str, mt5_path: str):
                     
             except Exception as e:
                 # Log solo se verbose mode
-                if st.sidebar.checkbox("Mostra errori Trade dettagliati", value=False, key=f"show_trade_errors_{account_id}"):
-                    st.warning(f"âš ï¸ Errore nel file trade {os.path.basename(file_path)}: {str(e)}")
+                if DEBUG:
+                    st.warning(f"⚠ Errore nel file trade {os.path.basename(file_path)}: {str(e)}")
                 continue
         
         # Pulisci progress bar
@@ -173,7 +174,7 @@ def get_trades_data(account_id: str, mt5_path: str):
             progress_text.empty()
     
     except Exception as e:
-        st.error(f"âŒ Errore nell'accesso alla cartella MT5 per Account {account_id}: {str(e)}")
+        st.error(f"[Errore] Errore nell'accesso alla cartella MT5 per Account {account_id}: {str(e)}")
         return pd.DataFrame()
 
     if all_trades:
@@ -213,7 +214,7 @@ def get_trades_data(account_id: str, mt5_path: str):
         st.warning(f"Nessun file di trade trovato per Account {account_id}")
         return pd.DataFrame()
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=CACHE_TTL_EA)
 def check_mt5_connection(account_id: str, mt5_path: str):
     """Verifica che la cartella MT5 sia accessibile per un account specifico"""
     if not os.path.exists(mt5_path):
@@ -236,7 +237,7 @@ def check_mt5_connection(account_id: str, mt5_path: str):
     }
 
 # ✅ AGGIUNTA: Funzione helper per debug filename patterns
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=CACHE_TTL_EA)
 def analyze_filename_patterns(account_id: str, mt5_path: str):
     """
     Analizza i pattern dei filename per un account specifico
