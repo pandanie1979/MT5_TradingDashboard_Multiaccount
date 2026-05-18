@@ -262,38 +262,27 @@ def _calculate_symbol_distribution(period_trades: pd.DataFrame) -> Dict[str, int
 def _render_deals_controls(period_trades: pd.DataFrame, account_id: str):
     """
     Render deals control buttons and options.
-    
+
     Args:
         period_trades: Filtered trades DataFrame
         account_id: Account identifier
     """
     st.markdown("---")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Refresh data button
-        if st.button(f"Aggiorna Dati Account {account_id}",
-                     key=f"refresh_data_tab4_{account_id}",
+
+    show_extended = st.session_state.get(f'show_more_deals_{account_id}', False)
+
+    if not show_extended:
+        if st.button("Mostra piu deals (100)",
+                     key=f"show_more_deals_tab4_{account_id}",
                      use_container_width=True):
-            st.cache_data.clear()
-            st.success("[OK] Cache pulita! I dati saranno aggiornati.")
-    
-    with col2:
-        # Toggle extended view
-        show_extended = st.session_state.get(f'show_more_deals_{account_id}', False)
-        
-        if not show_extended:
-            if st.button("Mostra piu deals (100)",
-                         key=f"show_more_deals_tab4_{account_id}",
-                         use_container_width=True):
-                st.session_state[f'show_more_deals_{account_id}'] = True
-                st.rerun()
-        else:
-            if st.button("Mostra meno deals (50)",
-                         key=f"hide_extended_deals_tab4_{account_id}",
-                         use_container_width=True):
-                st.session_state[f'show_more_deals_{account_id}'] = False
-                st.rerun()
+            st.session_state[f'show_more_deals_{account_id}'] = True
+            st.rerun()
+    else:
+        if st.button("Mostra meno deals (50)",
+                     key=f"hide_extended_deals_tab4_{account_id}",
+                     use_container_width=True):
+            st.session_state[f'show_more_deals_{account_id}'] = False
+            st.rerun()
 
 
 def render_deals_timeline_analysis(period_trades: pd.DataFrame, account_id: str):

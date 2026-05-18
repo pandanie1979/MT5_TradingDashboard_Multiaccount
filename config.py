@@ -13,6 +13,9 @@ DEFAULT_MT5_PATHS: list[str] = []
 CACHE_TTL_EA = 300  # 5 minuti per dati EA
 CACHE_TTL_TRADES = 300  # 5 minuti per dati trades
 
+# Auto-refresh interval (seconds). Minimum 60s — VPS safety.
+DASHBOARD_REFRESH_INTERVAL = 300
+
 # Limiti di visualizzazione
 MAX_RECENT_DEALS = 50
 MAX_DEBUG_ROWS = 100

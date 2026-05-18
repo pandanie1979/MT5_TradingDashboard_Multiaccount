@@ -6,7 +6,7 @@
 
 ## Current sprint
 
-**R4 — Feature development** | STATUS: `PLANNED`
+**Sprint Refactoring Cycle** | STATUS: `COMPLETE`
 
 ---
 
@@ -32,6 +32,31 @@
 ## Sprint plan
 
 ---
+
+### R7 — Final Roadmap & Quality Audit (COMPLETED)
+**STATUS**: `COMPLETE`
+**Branch**: `audit/final-review`
+**Scope**: Comprehensive verification of TD resolution and ADR compliance.
+
+---
+
+### R6 — Global Analytics (COMPLETED)
+**STATUS**: `COMPLETE`
+**Branch**: `feature/r6-global-analytics`
+**Scope**: Cross-account portfolio aggregation and visualization.
+
+#### Tasks
+- [x] Create `tabs/tab_global_analytics.py` with aggregation logic
+- [x] Implement cumulative equity curve for portfolio
+- [x] Implement per-account KPI comparison table
+- [x] Integrate Global tab into `main.py`
+
+**Done when**:
+- [x] Portfolio view sums P&L correctly across all accounts.
+- [x] Navigation includes the "Global" tab.
+
+---
+
 
 ### R1 — Foundation cleanup (COMPLETED)
 **STATUS**: `DONE`
@@ -61,7 +86,7 @@
 ---
 
 ### R2 — Cache and state simplification
-**STATUS**: `READY`
+**STATUS**: `COMPLETE`
 **Branch**: `refactor/r2-state`
 **Scope**: Eliminate double caching and pending/applied system.
 **ADRs in effect**: ADR-001, ADR-002, ADR-006
@@ -88,7 +113,7 @@
 ---
 
 ### R3 — UI polish and production hardening (COMPLETED)
-**STATUS**: `DONE`
+**STATUS**: `COMPLETE`
 **Branch**: `refactor/r3-polish`
 **Scope**: Production-ready output. No structural changes.
 **ADRs in effect**: all
@@ -108,16 +133,31 @@
 
 ---
 
-### R4 — Feature development (post-refactoring)
-**STATUS**: `PLANNED`
-**Scope**: New features. To be designed by Gemini after R3 complete.
+### R5 — Real-time Monitoring (COMPLETED)
+**STATUS**: `COMPLETE`
+**Branch**: `feature/r5-autorefresh`
+**Scope**: Automated refreshes and logic cleanup.
 
-#### Candidate features (not yet designed)
-- Auto-refresh timer (configurable interval, no manual cache clear button)
-- Export to CSV / Excel for performance summary
+#### Tasks
+- [x] Add `streamlit-autorefresh` to `requirements.txt`
+- [x] Define `DASHBOARD_REFRESH_INTERVAL` in `config.py`
+- [x] Implement autorefresh in `main.py`
+- [x] Remove manual cache-clearing UI buttons
+
+**Done when**:
+- [x] Dashboard refreshes automatically every 300s.
+- [x] UI is simplified by removing redundant refresh buttons.
+
+### R4 — Feature development: Export Performance Summary
+**STATUS**: `COMPLETE`
+**Branch**: `feature/r4-export-summary`
+**Scope**: CSV export of performance KPIs based on current sidebar filters.
+
+#### Future Backlog (Candidate features)
 - Per-setup P&L sparklines in EA Attivi tab
-- Multi-account aggregated view (cross-account equity curve)
 - Alert system: EA inactive with open position → notification (email or Telegram)
+
+---
 
 ---
 
@@ -157,8 +197,12 @@ Hash is 32-char string. Find it by opening MT5 → Tools → Options → Expert 
 | ADR-004 | No runtime debug UI — env var gate | ACTIVE |
 | ADR-005 | UTF-8 source files, no inline emoji in code | ACTIVE |
 | ADR-006 | Immediate apply on sidebar changes | ACTIVE |
+| ADR-007 | Export consolidated performance summary to CSV | ACTIVE |
+| ADR-008 | Automated dashboard refresh via streamlit-autorefresh | ACTIVE |
+| ADR-009 | Removal of manual cache-clearing UI buttons | ACTIVE |
+| ADR-010 | Cross-account data aggregation strategy | ACTIVE |
 
 ---
 
-*ROADMAP.md — v1.0 — 2026-05-18*
+*ROADMAP.md — v1.1 — 2026-05-18*
 *Update STATUS fields after each sprint completion. Do not modify ADR entries without Gemini approval.*

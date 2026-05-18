@@ -17,6 +17,7 @@ from .utils.session_helpers import (
     get_sidebar_width,
 )
 from .utils.formatting import get_error_message
+from .utils.metrics import get_performance_summary_data
 
 try:
     from data.loader import get_trades_data
@@ -61,6 +62,7 @@ def render(account_id: str, account_path: str, account_info: Dict[str, Any]):
     with main_col:
         render_main_area_header(account_id, account_info)
         period_trades = get_current_period_trades(trades_df, account_id)
+        render_export_button(period_trades, account_id)
         render_main_tabbed_area(period_trades, account_id, account_path, account_info)
 
 
@@ -74,6 +76,27 @@ def render_main_area_header(account_id: str, account_info: Dict[str, Any]):
     </div>
     """, unsafe_allow_html=True)
     st.markdown("---")
+
+
+def render_export_button(period_trades: pd.DataFrame, account_id: str):
+    """Render the CSV export button when period_trades is not empty."""
+    if period_trades.empty:
+        return
+
+    summary = get_performance_summary_data(period_trades, account_id)
+    summary_df = pd.DataFrame([summary])
+
+    start = summary.get('Start_Date', '').replace('-', '')
+    end = summary.get('End_Date', '').replace('-', '')
+    filename = f"perf_summary_{account_id}_{start}_{end}.csv"
+
+    st.download_button(
+        label="Export Performance Summary (CSV)",
+        data=summary_df.to_csv(index=False),
+        file_name=filename,
+        mime="text/csv",
+        use_container_width=True,
+    )
 
 
 def render_main_tabbed_area(period_trades: pd.DataFrame, account_id: str,

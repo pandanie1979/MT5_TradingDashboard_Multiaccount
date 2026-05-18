@@ -149,7 +149,7 @@ def render_path_management():
             "Percorso MT5:",
             value="",
             help="Inserisci il percorso completo alla cartella Files di MT5",
-            placeholder=r"C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\...\MQL5\Files"
+            placeholder=r"%APPDATA%\MetaQuotes\Terminal\<HASH>\MQL5\Files"
         )
 
         col1, col2 = st.columns(2)

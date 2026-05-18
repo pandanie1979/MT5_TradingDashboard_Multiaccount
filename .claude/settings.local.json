@@ -5,7 +5,8 @@
       "Edit(*)",
       "Write(*)",
       "Read(*)",
-      "MultiEdit(*)"
+      "MultiEdit(*)",
+      "PowerShell(& \"d:\\\\Development\\\\Finanza\\\\MT5_TradingDashboard_Multiaccount\\\\cleanup.ps1\")"
     ]
   }
 }

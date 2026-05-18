@@ -3,8 +3,10 @@ import streamlit as st
 import os
 from datetime import datetime, timedelta
 
-from tabs import tab_ea_attivi, tab_performance, tab_posizioni, tab_settings
-from config import load_mt5_paths, discover_accounts_from_paths
+from streamlit_autorefresh import st_autorefresh
+
+from tabs import tab_ea_attivi, tab_global_analytics, tab_performance, tab_posizioni, tab_settings
+from config import load_mt5_paths, discover_accounts_from_paths, DASHBOARD_REFRESH_INTERVAL
 
 
 def _ensure_basic_session_state(account_id: str):
@@ -23,9 +25,7 @@ def _ensure_basic_session_state(account_id: str):
         st.session_state[f"basic_init_{account_id}"] = True
 
 
-@st.cache_data
-def load_css():
-    """Load CSS with caching to avoid file read on every rerun."""
+    """Load CSS stylesheet."""
     try:
         with open("assets/style.css", "r", encoding="utf-8") as f:
             return f.read()
@@ -42,6 +42,8 @@ def main():
         layout="wide",
         initial_sidebar_state="expanded"
     )
+
+    st_autorefresh(interval=DASHBOARD_REFRESH_INTERVAL * 1000, key="data_refresh")
 
     css = load_css()
     if css:
@@ -89,11 +91,12 @@ def main():
     with col3:
         st.metric("File EA Monitor", account_info['ea_files'])
 
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "\U0001f4c8 Performance",
         "\U0001f4ca EA Attivi",
         "\U0001f4b0 Posizioni",
-        "Impostazioni"
+        "Impostazioni",
+        "\U0001f310 Global",
     ])
 
     with tab1:
@@ -127,6 +130,13 @@ def main():
             tab_settings.render(accounts_data)
         except Exception as e:
             st.error(f"Errore tab Impostazioni: {e}")
+            st.exception(e)
+
+    with tab5:
+        try:
+            tab_global_analytics.render(all_accounts)
+        except Exception as e:
+            st.error(f"Errore tab Global: {e}")
             st.exception(e)
 
 

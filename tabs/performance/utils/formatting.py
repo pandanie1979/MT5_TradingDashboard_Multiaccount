@@ -77,7 +77,7 @@ def format_status(status: str) -> str:
         'ACTIVE': {'color': 'green', 'icon': '●'},
         'INACTIVE': {'color': 'red', 'icon': '●'},
         'PAUSED': {'color': 'orange', 'icon': '●'},
-        'ERROR': {'color': 'red', 'icon': '⚠'},
+        'ERROR': {'color': 'red', 'icon': '\u26a0'},
         'UNKNOWN': {'color': 'gray', 'icon': '?'}
     }
     
@@ -388,7 +388,7 @@ def create_info_box(title: str, content: str, box_type: str = "info") -> str:
     colors = {
         "info": {"bg": "#e3f2fd", "border": "#2196f3", "icon": "[i]"},
         "success": {"bg": "#e8f5e8", "border": "#4caf50", "icon": "[OK]"},
-        "warning": {"bg": "#fff3e0", "border": "#ff9800", "icon": "⚠"},
+        "warning": {"bg": "#fff3e0", "border": "#ff9800", "icon": "\u26a0"},
         "error": {"bg": "#ffebee", "border": "#f44336", "icon": "[ERR]"}
     }
     
