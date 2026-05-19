@@ -106,6 +106,9 @@ def get_trades_data(account_id: str, mt5_path: str):
             st.warning(f"Nessun file di trade trovato per Account {account_id} in: {mt5_path}")
             return pd.DataFrame()
 
+        if DEBUG:
+            st.info(f"[DEBUG] {len(account_files)} file trovati per account {account_id}. Primo: {os.path.basename(account_files[0])}")
+
         # Progress bar per file numerosi
         if len(account_files) > 5:
             progress_bar = st.progress(0)
@@ -137,10 +140,14 @@ def get_trades_data(account_id: str, mt5_path: str):
                 # Verifica colonne richieste
                 required_columns = ['OpenPositionTicket', 'MagicNumber', 'PL', 'OpenDatetime']
                 if not all(col in df.columns for col in required_columns):
+                    if DEBUG and idx == 0:
+                        st.warning(f"[DEBUG] Colonne mancanti nel primo file. Colonne trovate: {list(df.columns)}")
                     continue
-                
+
                 # Filtra solo trade chiusi (con P&L)
                 completed_trades = df[df['PL'].notna() & (df['PL'] != 0)].copy()
+                if DEBUG and idx == 0:
+                    st.info(f"[DEBUG] Primo file: {len(df)} righe totali, {len(completed_trades)} con PL != 0. PL dtype: {df['PL'].dtype}, sample values: {df['PL'].head(3).tolist()}")
                 
                 if not completed_trades.empty:
                     files_with_trades += 1
