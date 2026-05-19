@@ -148,6 +148,12 @@ def get_trades_data(account_id: str, mt5_path: str):
                 completed_trades = df[df['PL'].notna() & (df['PL'] != 0)].copy()
                 if DEBUG and idx == 0:
                     st.info(f"[DEBUG] Primo file: {len(df)} righe totali, {len(completed_trades)} con PL != 0. PL dtype: {df['PL'].dtype}, sample values: {df['PL'].head(3).tolist()}")
+                    try:
+                        with open(file_path, 'rb') as _raw:
+                            raw_preview = _raw.read(400)
+                        st.code(f"[DEBUG] Raw bytes primo file:\n{raw_preview}")
+                    except Exception as _e:
+                        st.warning(f"[DEBUG] Lettura raw fallita: {_e}")
                 
                 if not completed_trades.empty:
                     files_with_trades += 1
