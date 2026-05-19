@@ -161,6 +161,15 @@
 
 ---
 
+## Hotfix log
+
+| Date | Fix | File(s) |
+|------|-----|---------|
+| 2026-05-19 | Restore missing `def load_css():` header accidentally dropped from `_ensure_basic_session_state` | `main.py` |
+| 2026-05-19 | Extract `all_accounts` from wrapper dict in settings tab — resolves `KeyError: 'path'` in `render_account_management` and `render_debug_info` | `tabs/tab_settings.py` |
+
+---
+
 ## Deployment checklist (post R1)
 
 For initial deploy on contabo-win:

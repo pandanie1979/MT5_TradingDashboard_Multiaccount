@@ -31,7 +31,9 @@ def render_account_management(accounts_data: dict):
     """Sezione gestione account"""
     st.subheader("Account Configurati")
 
-    if not accounts_data:
+    all_accounts = accounts_data.get('all_accounts', {})
+
+    if not all_accounts:
         st.warning("Nessun account trovato. Configura i percorsi MT5 nella tab 'Percorsi MT5'.")
         return
 
@@ -39,7 +41,7 @@ def render_account_management(accounts_data: dict):
     st.write("**Account disponibili:**")
 
     account_status_data = []
-    for account_id, info in accounts_data.items():
+    for account_id, info in all_accounts.items():
         is_valid, message = verify_mt5_path(info['path'])
 
         account_status_data.append({
@@ -69,12 +71,12 @@ def render_account_management(accounts_data: dict):
 
         selected_account = st.selectbox(
             "Seleziona account per dettagli:",
-            options=list(accounts_data.keys()),
+            options=list(all_accounts.keys()),
             key="settings_account_selector"
         )
 
         if selected_account:
-            account_info = accounts_data[selected_account]
+            account_info = all_accounts[selected_account]
             account_color = account_info.get('color', '#1f77b4')
 
             col1, col2 = st.columns(2)
@@ -219,6 +221,8 @@ def render_debug_info(accounts_data: dict):
     """Sezione debug e informazioni sistema"""
     st.subheader("Informazioni Debug")
 
+    all_accounts = accounts_data.get('all_accounts', {})
+
     # Info configurazione
     st.write("**Configurazione Sistema:**")
 
@@ -237,7 +241,7 @@ def render_debug_info(accounts_data: dict):
                 st.caption("Errore lettura file")
 
         # Info account
-        st.metric("Account Rilevati", len(accounts_data))
+        st.metric("Account Rilevati", len(all_accounts))
         st.metric("Percorsi Configurati", len(load_accounts_config()))
 
     with col2:
@@ -253,11 +257,11 @@ def render_debug_info(accounts_data: dict):
             st.success("Cache pulita!")
 
     # Dettagli tecnici per ogni account
-    if accounts_data:
+    if all_accounts:
         st.markdown("---")
         st.subheader("Dettagli Tecnici Account")
 
-        for account_id, info in accounts_data.items():
+        for account_id, info in all_accounts.items():
             with st.expander(f"Account {account_id} - Debug Info"):
                 col1, col2 = st.columns(2)
 
@@ -300,7 +304,7 @@ def render_debug_info(accounts_data: dict):
         st.write("**Configurazione Corrente:**")
         current_config = {
             "mt5_paths": load_accounts_config(),
-            "accounts_discovered": len(accounts_data),
+            "accounts_discovered": len(all_accounts),
             "config_file_exists": os.path.exists(ACCOUNTS_CONFIG_FILE)
         }
         st.json(current_config)
@@ -332,7 +336,7 @@ def render_debug_info(accounts_data: dict):
         if st.button("Export Configurazione", use_container_width=True):
             export_config = {
                 "mt5_paths": load_accounts_config(),
-                "accounts_data": accounts_data,
+                "accounts_data": all_accounts,
                 "timestamp": datetime.now().isoformat()
             }
             st.download_button(
