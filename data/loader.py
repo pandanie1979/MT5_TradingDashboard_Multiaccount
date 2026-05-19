@@ -33,7 +33,8 @@ def get_ea_data(account_id: str, mt5_path: str):
                 df = None
                 for encoding in SUPPORTED_ENCODINGS:
                     try:
-                        df = pd.read_csv(file_path, sep=',', encoding=encoding)
+                        with open(file_path, 'r', encoding=encoding) as _f:
+                            df = pd.read_csv(_f, sep=',')
                         break
                     except (UnicodeDecodeError, Exception):
                         continue
@@ -129,7 +130,8 @@ def get_trades_data(account_id: str, mt5_path: str):
                 df = None
                 for encoding in SUPPORTED_ENCODINGS:
                     try:
-                        df = pd.read_csv(file_path, sep=',', encoding=encoding)
+                        with open(file_path, 'r', encoding=encoding) as _f:
+                            df = pd.read_csv(_f, sep=',')
                         break
                     except (UnicodeDecodeError, Exception):
                         continue
