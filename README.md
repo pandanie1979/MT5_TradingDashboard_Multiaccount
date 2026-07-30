@@ -127,6 +127,16 @@ streamlit run main.py
 
 The dashboard will be available at `http://localhost:8501` by default.
 
+### Stopping the Dashboard
+
+`stop_dashboard.ps1` stops the running dashboard process by matching `MT5Dashboard` in the
+process command line (so it won't touch unrelated Python/Streamlit processes on the same
+machine):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File stop_dashboard.ps1
+```
+
 ### Debug Mode
 
 Set `DASHBOARD_DEBUG=true` to enable file-pattern analysis and detailed error output.

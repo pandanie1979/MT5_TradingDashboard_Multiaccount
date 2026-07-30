@@ -1,5 +1,5 @@
 # Project Status Report: MT5 Trading Dashboard
-**Date**: 2026-05-18
+**Date**: 2026-07-30 (last hotfix pass; refactoring section below dated 2026-05-18)
 **Target Environment**: Windows Server 2025 (Contabo VPS)
 **Refactoring Status**: 100% COMPLETE
 
@@ -44,6 +44,33 @@ The application has been fully refactored into a modular architecture.
 - **Future Features**:
     - Alert System (EA Inactivity/Notifications).
     - P&L Sparklines in the Active EA tab.
+
+## 6. 2026-07-30 hotfix pass (post-refactor)
+
+Cross-checked against `portfolio_governance`'s dashboard integration data contract
+(sibling project, same VPS, sizes risk for the same EAs this dashboard monitors):
+
+- **Monitored accounts changed**: `accounts_config.json` (local, git-ignored) now watches
+  the sensor account (login `5977682`) and the real account (login `955617`). The demo
+  actor account was dropped — permanently decommissioned 2026-07-29/30, frozen, no longer
+  live. See `ROADMAP.md`'s Hotfix log for the full account-ID mapping.
+- **Encoding bug fixed**: `SUPPORTED_ENCODINGS` in `config.py` tried `utf-16` before
+  `utf-8`. EAMonitor CSVs are UTF-8 — decoding them as `utf-16` was succeeding silently
+  with garbled output rather than raising, a TD-02-class regression. Reordered to try
+  `utf-8` first; trade CSVs (genuinely UTF-16LE) are unaffected since a real UTF-16 BOM
+  fails a `utf-8` decode immediately and falls through correctly.
+- **BOM tolerance fixed**: `load_accounts_config()` now opens `accounts_config.json` with
+  `encoding='utf-8-sig'`, so a stray UTF-8 BOM (e.g. from a Windows text editor) no longer
+  causes a silent fallback to blind auto-discovery of every terminal folder on disk.
+- **Repo ACL fixed**: every pre-existing tracked file had an Administrators/SYSTEM-only
+  write ACL (consistent with the repo having been cloned from an elevated session) —
+  recursively granted the runtime user Modify rights so non-elevated writes (including the
+  dashboard's own Settings-tab `save_accounts_config()`) work correctly.
+- **New tooling**: `stop_dashboard.ps1` (repo root) plus a Desktop `.bat` launcher, to stop
+  the running dashboard by matching `MT5Dashboard` in the process command line.
+- Verified via direct `discover_accounts_from_paths()` / `get_ea_data()` /
+  `get_trades_data()` calls against the real terminal folders, and a live `streamlit run`
+  smoke test (HTTP 200, no server errors).
 
 ---
 **Migration Verdict**: READY FOR DEPLOYMENT.

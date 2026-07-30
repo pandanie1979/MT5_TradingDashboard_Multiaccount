@@ -167,6 +167,11 @@
 |------|-----|---------|
 | 2026-05-19 | Restore missing `def load_css():` header accidentally dropped from `_ensure_basic_session_state` | `main.py` |
 | 2026-05-19 | Extract `all_accounts` from wrapper dict in settings tab — resolves `KeyError: 'path'` in `render_account_management` and `render_debug_info` | `tabs/tab_settings.py` |
+| 2026-07-30 | Reorder `SUPPORTED_ENCODINGS` to try `utf-8` before `utf-16` — EAMonitor CSVs are UTF-8 (confirmed against `portfolio_governance`'s reference reader); decoding real UTF-8 as `utf-16` was succeeding silently with garbled output instead of raising, a TD-02-class regression reintroduced by encoding order rather than a genuine encoding mismatch | `config.py` |
+| 2026-07-30 | Open `accounts_config.json` with `encoding='utf-8-sig'` — a stray UTF-8 BOM (introduced by an external edit) was making `json.load()` raise, silently swallowed by the existing `except: pass`, causing `load_mt5_paths()` to fall back to blind auto-discovery of every terminal folder instead of the configured two | `config.py` |
+| 2026-07-30 | Swapped monitored accounts in `accounts_config.json` (git-ignored, not committed): dropped the demo actor (`A08D7ED0...`, permanently decommissioned 2026-07-29/30 per `portfolio_governance`'s dashboard integration data contract) and added the sensor (`27F8EE35...`, live). Real account (`4DBA2531...`) unchanged. Verified via direct `discover_accounts_from_paths`/`get_ea_data`/`get_trades_data` calls and a live `streamlit run` | `accounts_config.json` (local only) |
+| 2026-07-30 | Added `stop_dashboard.ps1` (matches by `MT5Dashboard` in the process command line) plus a Desktop `.bat` launcher, for a reliable way to stop the running dashboard without hunting PIDs in Task Manager | `stop_dashboard.ps1` |
+| 2026-07-30 | Found the whole repo had an Administrators/SYSTEM-only write ACL on every pre-existing tracked file (consistent with the repo having been cloned from an elevated session) — recursively granted `pandanie1979` Modify rights so non-elevated edits (including the dashboard's own `save_accounts_config()`) work | n/a (filesystem ACL, not source) |
 
 ---
 

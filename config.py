@@ -20,8 +20,13 @@ DASHBOARD_REFRESH_INTERVAL = 300
 MAX_RECENT_DEALS = 50
 MAX_DEBUG_ROWS = 100
 
-# Encoding supportati per i file CSV
-SUPPORTED_ENCODINGS = ['utf-16', 'utf-8', 'cp1252', 'latin1']
+# Encoding supportati per i file CSV.
+# utf-8 must be tried before utf-16: decoding real utf-8 bytes as utf-16 (or vice versa)
+# often succeeds silently with garbled output instead of raising, so a genuinely-wrong
+# encoding earlier in this list can mask itself as success (this was TD-02's failure mode).
+# utf-8 fails fast on a real utf-16 BOM (invalid start byte), so trying it first is safe
+# for both EAMonitor CSVs (utf-8) and trade CSVs (utf-16LE with BOM).
+SUPPORTED_ENCODINGS = ['utf-8', 'utf-16', 'cp1252', 'latin1']
 
 # Pattern file
 EA_MONITOR_PATTERN = "EAMon_*.csv"
@@ -97,7 +102,7 @@ def load_accounts_config() -> Dict[str, List[str]]:
     """Carica configurazione account da file JSON"""
     try:
         if os.path.exists(ACCOUNTS_CONFIG_FILE):
-            with open(ACCOUNTS_CONFIG_FILE, 'r') as f:
+            with open(ACCOUNTS_CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
                 config = json.load(f)
                 return config.get('mt5_paths', DEFAULT_MT5_PATHS)
     except Exception:
